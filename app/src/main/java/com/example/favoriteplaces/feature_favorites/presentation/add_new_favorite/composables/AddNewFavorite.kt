@@ -7,23 +7,31 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.favoriteplaces.feature_favorites.presentation.add_new_favorite.AddNewFavoriteEvent
 import com.example.favoriteplaces.feature_favorites.presentation.add_new_favorite.AddNewFavoriteViewModel
-import com.example.favoriteplaces.feature_favorites.presentation.util.PlacesAutocompleteManager
 
 
 @Composable
 fun AddNewFavorite(
     viewModel: AddNewFavoriteViewModel = hiltViewModel()
 ) {
-    val placesAutocompleteManager = rememberPlacesAutocompleteManager()
     val searchString = viewModel.favoriteTitle.value
-    val searchHint = viewModel.favoriteTitle
+
+//    val placesAutocompleteManager = rememberPlacesAutocompleteManager(
+//        onPlaceSelected = { place ->
+//        viewModel.onEvent(
+//            AddNewFavoriteEvent.SelectedResult(
+//                AutocompleteResult(
+//                    address = place.address!!,
+//                    placeId = place.id!!,
+//                    location = place.latLng!!
+//                )
+//            )
+//        )
+//    })
 
     Box(
         modifier = Modifier
@@ -33,7 +41,8 @@ fun AddNewFavorite(
         TransparentHintField(
             text = searchString.text,
             hint = searchString.hint,
-            onValueChange = { viewModel.onEvent(AddNewFavoriteEvent.EnteredSearch(it)) },
+            onValueChange = {newValue ->
+                viewModel.onEvent(AddNewFavoriteEvent.EnteredSearch(newValue)) },
             onFocusChange = { viewModel.onEvent(AddNewFavoriteEvent.ChangeSearchFocus(it)) },
             isHintVisible = searchString.isHintVisible,
             textStyle = androidx.compose.material.MaterialTheme.typography.body1,
@@ -43,14 +52,18 @@ fun AddNewFavorite(
     }
     // Log the locationAutofill results
     for (result in viewModel.locationAutofill) {
-        Log.d("mainResult", result.address)
+        Log.d("mainResult", "Results : ${ result.address }")
     }
 }
 
-@Composable
-private fun rememberPlacesAutocompleteManager(): PlacesAutocompleteManager {
-    val context = LocalContext.current
-    return remember(context) { PlacesAutocompleteManager(context) }
-}
+//@Composable
+//private fun rememberPlacesAutocompleteManager(
+//    onPlaceSelected: (Place) -> Unit
+//): PlacesAutocompleteManager {
+//    val context = LocalContext.current
+//    return remember(context) {
+//        PlacesAutocompleteManager(context, onPlaceSelected)
+//    }
+//}
 
 

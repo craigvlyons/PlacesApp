@@ -2,6 +2,7 @@ package com.example.favoriteplaces.feature_favorites.presentation.add_new_favori
 
 import android.annotation.SuppressLint
 import android.location.Geocoder
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -11,12 +12,12 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.favoriteplaces.feature_favorites.domain.model.Favorite
+import com.example.favoriteplaces.feature_favorites.domain.use_case.SearchPlacesUseCase
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
-import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -29,11 +30,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AddNewFavoriteViewModel @Inject constructor(
-    private val placesClient: PlacesClient, // Inject PlacesClient dependency
-    private val fusedLocationClient: FusedLocationProviderClient, // Inject FusedLocationProviderClient dependency
-    private val geoCoder: Geocoder // Inject Geocoder dependency
+    private val placesClient: PlacesClient,
+    private val fusedLocationClient: FusedLocationProviderClient,
+    private val geoCoder: Geocoder,
+    private val searchPlacesUseCase: SearchPlacesUseCase
 ) : ViewModel() {
-
     var locationState by mutableStateOf<LocationState>(LocationState.NoPermission)
     val locationAutofill = mutableStateListOf<AutocompleteResult>()
     private val _selectedAutofill =
@@ -63,6 +64,7 @@ class AddNewFavoriteViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
+
     // Cancel any running coroutine job when ViewModel is cleared
     override fun onCleared() {
         super.onCleared()
@@ -76,11 +78,7 @@ class AddNewFavoriteViewModel @Inject constructor(
                 _favoriteTitle.value = _favoriteTitle.value.copy(
                     text = event.value
                 )
-                //searchPlaces(_favoriteTitle.value.text)
-                //searchPlaces(_favoriteTitle.value.text)
-                //searchPlaces(_favoriteTitle.value.text)
-                //searchPlaces(_favoriteTitle.value.text)
-                //searchPlaces(_favoriteTitle.value.text)
+               searchPlaces(_favoriteTitle.value.text)
             }
 
             is AddNewFavoriteEvent.ChangeSearchFocus -> {
@@ -115,24 +113,17 @@ class AddNewFavoriteViewModel @Inject constructor(
         locationAutofill.clear()
         job = viewModelScope.launch {
             try {
-                val request = FindAutocompletePredictionsRequest
-                    .builder()
-                    .setQuery(query)
-                    .build()
-
-                val response = placesClient.findAutocompletePredictions(request)
-                val predictions = response.result.autocompletePredictions
-
-                locationAutofill += predictions.map { prediction ->
-
-                    AutocompleteResult(
-                        address = prediction.getFullText(null).toString(),
-                        placeId = prediction.placeId,
-                        location = LatLng(0.0, 0.0)
-                    )
-                }
+                val places =  searchPlacesUseCase(query)
+                    locationAutofill += places.map { place ->
+                        AutocompleteResult(
+                            address = place.address,
+                            placeId = place.id,
+                            location = place.latLng
+                        )
+                    }
             } catch (e: Exception) {
                 _eventFlow.emit(UiEvent.ShowSnackbar("Error getting address"))
+                Log.i("resultTag", "Failed to get response")
             }
         }
     }
@@ -170,6 +161,7 @@ class AddNewFavoriteViewModel @Inject constructor(
                     }
             }
     }
+
 
     fun getAddress(latLng: LatLng) {
         viewModelScope.launch {

@@ -14,7 +14,10 @@ import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 
-class PlacesAutocompleteManager(private val context: Context) {
+class PlacesAutocompleteManager(
+    private val context: Context,
+    private val onPlaceSelected: (Place) -> Unit
+) {
     private val autocompleteFragment = AutocompleteSupportFragment.newInstance().apply {
         setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME))
     }
@@ -22,7 +25,7 @@ class PlacesAutocompleteManager(private val context: Context) {
     init {
         autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
-                // Handle the selected place
+                onPlaceSelected(place)
             }
 
             override fun onError(status: Status) {
@@ -43,4 +46,6 @@ class PlacesAutocompleteManager(private val context: Context) {
             modifier = modifier
         )
     }
+
+
 }
