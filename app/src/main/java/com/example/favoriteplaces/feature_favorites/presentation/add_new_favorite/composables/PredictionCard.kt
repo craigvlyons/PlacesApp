@@ -1,5 +1,6 @@
 package com.example.favoriteplaces.feature_favorites.presentation.add_new_favorite.composables
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -15,7 +16,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -33,10 +38,28 @@ fun PredictionCard(
 ) {
     Box(
         modifier = modifier
+            .shadow(6.dp, shape = RoundedCornerShape(cornerRadius))
             .background(MaterialTheme.colorScheme.primary)
-            .border(1.dp, Color.DarkGray, shape = RoundedCornerShape(16.dp))
+            .border(0.5.dp, Color.DarkGray, shape = RoundedCornerShape(cornerRadius))
 
     ) {
+        Canvas(modifier = Modifier.matchParentSize()) {
+            val clipPath = Path().apply {
+                lineTo(size.width , 0f)
+                lineTo(size.width, 0f)
+                lineTo(size.width, size.height)
+                lineTo(0f, size.height)
+                close()
+            }
+
+            clipPath(clipPath) {
+                drawRoundRect(
+                    color = Color.Transparent,
+                    size = size,
+                    cornerRadius = CornerRadius(cornerRadius.toPx())
+                )
+            }
+        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -67,7 +90,6 @@ fun PredictionCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 val joinedString = prediction.types.joinToString(" | ")
-
                     Text(
                         text = joinedString,
                         style = MaterialTheme.typography.bodyMedium,
@@ -76,7 +98,7 @@ fun PredictionCard(
                     )
                 }
 
-
+            // Show map if selected
             if (selectedId == prediction.placeId) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
@@ -89,32 +111,10 @@ fun PredictionCard(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            // add Map.
-            //Spacer(modifier = Modifier.height(8.dp))
-
         }
     }
 
 }
 
-//
-//@Preview
-//@Composable
-//fun PreviewPrediction(){
-//    PredictionCard(
-//        prediction = Prediction(
-//        title = "place to eat",
-//        address = "1111 main street, colorado springs, CO 80903",
-//
-//        placeId = "",
-//
-//        content = "would i eat here again?",
-//        location = LatLng(364758.0,3846539.0),
-//        rating = 3
-//    )
-//    ) {
-//
-//    }
-//}
 
 

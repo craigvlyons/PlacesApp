@@ -68,14 +68,14 @@ fun AddNewFavorite(
             }
             // Spacer(modifier = Modifier.height(6.dp))
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .padding(end = 10.dp),
                 horizontalArrangement = Arrangement.End
             ) {
 
                 Button(
                     modifier = Modifier
                         .background(MaterialTheme.colorScheme.primary)
-                        .padding(end = 10.dp)
                         .border(1.dp, Color.DarkGray, shape = RoundedCornerShape(size = 20.dp)),
                     onClick = { viewModel.onEvent(AddNewFavoriteEvent.Search) },
 
