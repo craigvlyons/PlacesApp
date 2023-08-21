@@ -63,7 +63,12 @@ android {
 
 dependencies {
 
-    //implementation (project(path: ":Secrets"))
+    val retrofitVersion = "2.9.0"
+    val glideVersion = "4.13.2"
+    //Retrofit
+    implementation ("com.squareup.retrofit2:retrofit:$retrofitVersion")
+    implementation ("com.squareup.retrofit2:converter-gson:$retrofitVersion")
+    implementation ("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.6")
 
     implementation("androidx.core:core-ktx:1.10.1")
     implementation ("androidx.appcompat:appcompat:1.6.1")
@@ -109,6 +114,10 @@ dependencies {
     // Room
     implementation ("androidx.room:room-runtime:2.5.2")
     kapt ("androidx.room:room-compiler:2.5.2")
+
+    //Glide
+    implementation ("com.github.bumptech.glide:glide:$glideVersion")
+    annotationProcessor ("com.github.bumptech.glide:compiler:$glideVersion")
 
     // Kotlin Extensions and Coroutines support for Room
     implementation ("androidx.room:room-ktx:2.5.2")

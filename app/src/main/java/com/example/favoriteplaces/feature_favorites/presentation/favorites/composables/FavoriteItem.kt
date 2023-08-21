@@ -81,7 +81,7 @@ fun FavoriteItem(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = favorite.content,
+                text = favorite.content!!,
                 style = MaterialTheme.typography.body1,
                 color = MaterialTheme.colors.onSurface,
                 maxLines = 10,

@@ -5,19 +5,20 @@ import android.location.Geocoder
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.favoriteplaces.feature_favorites.data.models.Prediction
+import com.example.favoriteplaces.feature_favorites.data.models.placedetails.Result
+import com.example.favoriteplaces.feature_favorites.data.repository.Resource
 import com.example.favoriteplaces.feature_favorites.domain.model.Favorite
-import com.example.favoriteplaces.feature_favorites.domain.use_case.SearchPlacesUseCase
+import com.example.favoriteplaces.feature_favorites.domain.use_case.GetPlaceDetailsUseCase
+import com.example.favoriteplaces.feature_favorites.domain.use_case.GetPredictionsUseCase
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.libraries.places.api.model.Place
-import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -33,17 +34,15 @@ class AddNewFavoriteViewModel @Inject constructor(
     private val placesClient: PlacesClient,
     private val fusedLocationClient: FusedLocationProviderClient,
     private val geoCoder: Geocoder,
-    private val searchPlacesUseCase: SearchPlacesUseCase
+    private val getPredictionsUseCase: GetPredictionsUseCase,
+    private val getPlaceDetailsUseCase: GetPlaceDetailsUseCase
 ) : ViewModel() {
     var locationState by mutableStateOf<LocationState>(LocationState.NoPermission)
-    val locationAutofill = mutableStateListOf<AutocompleteResult>()
-    private val _selectedAutofill =
-        mutableStateOf<AutocompleteResult>(AutocompleteResult(
-            address = "",
-            placeId = "",
-            location = LatLng(0.0, 0.0),
-        ))
-    val selectedResult: State<AutocompleteResult> = _selectedAutofill
+    var isLoading = false
+
+    private val _uiState = mutableStateOf(AddNewFavoriteUiState())
+    val uiState: State<AddNewFavoriteUiState> = _uiState
+
 
     private var currentLatLong by mutableStateOf(LatLng(0.0, 0.0))
 
@@ -72,13 +71,13 @@ class AddNewFavoriteViewModel @Inject constructor(
         viewModelScope.cancel()
     }
 
+    // *** Events ***
     fun onEvent(event: AddNewFavoriteEvent) {
         when (event) {
             is AddNewFavoriteEvent.EnteredSearch -> {
                 _favoriteTitle.value = _favoriteTitle.value.copy(
                     text = event.value
                 )
-               searchPlaces(_favoriteTitle.value.text)
             }
 
             is AddNewFavoriteEvent.ChangeSearchFocus -> {
@@ -88,59 +87,104 @@ class AddNewFavoriteViewModel @Inject constructor(
                 )
             }
 
+            is AddNewFavoriteEvent.ToggleMapSelection -> {
+                // this should call an api function to get location data, passing the selected Prediction Id.
+                TODO()
+            }
+
             is AddNewFavoriteEvent.SaveFavorite -> {
                 TODO()
             }
 
+            is AddNewFavoriteEvent.Search -> {
+                searchPlaces(_favoriteTitle.value.text)
+            }
+
             is AddNewFavoriteEvent.SelectedResult -> {
-                viewModelScope.launch {
-                    _selectedAutofill.value = _selectedAutofill.value.copy(
-                        address = event.autocompleteResult.address,
-                        placeId = event.autocompleteResult.placeId
-                    )
-                    _eventFlow.emit(
-                        UiEvent.ShowSnackbar(
-                            message = "Place selected:  ${_selectedAutofill.value.placeId} ${_selectedAutofill.value.address}"
-                        )
-                    )
-                }
+                // this is a selected prediction.
+                getCoordinates(event.predictionResult.placeId)
+                Log.i("result", "prediction Id: ${event.predictionResult.placeId}")
             }
         }
     }
 
     private fun searchPlaces(query: String) {
         job?.cancel()
-        locationAutofill.clear()
+        // updateUiStatePredictions(emptyList())
         job = viewModelScope.launch {
             try {
-                val places =  searchPlacesUseCase(query)
-                    locationAutofill += places.map { place ->
-                        AutocompleteResult(
-                            address = place.address,
-                            placeId = place.id,
-                            location = place.latLng
-                        )
+                getPredictionsUseCase(query).collect() { response ->
+                    when (response) {
+                        is Resource.Success -> {
+                            updateUiStatePredictions(response.data ?: emptyList())
+                        }
+
+                        else -> {
+                            Log.i("tag", "when else block, error in getPredictionsUseCase")
+                        }
                     }
+                }
+                isLoading = false
+
             } catch (e: Exception) {
-                _eventFlow.emit(UiEvent.ShowSnackbar("Error getting address"))
-                Log.i("resultTag", "Failed to get response")
+                // _eventFlow.emit(UiEvent.ShowSnackbar("Error getting address"))
+                Log.i("resultTag", "Failed to get response: ${e.message}")
             }
         }
     }
 
-    fun getCoordinates(result: AutocompleteResult) {
-        val placeFields = listOf(Place.Field.LAT_LNG)
-        val request = FetchPlaceRequest.newInstance(result.placeId, placeFields)
-        placesClient.fetchPlace(request)
-            .addOnSuccessListener {
-                if (it != null) {
-                    currentLatLong = it.place.latLng!!
-                }
-            }
-            .addOnFailureListener {
-                it.printStackTrace()
-            }
+    // *** functions ***
+    private fun updateUiStatePredictions(predictions: List<Prediction>) {
+        _uiState.value = _uiState.value.copy(predictions = predictions)
     }
+
+    private fun updateUiStateFavorite(favorite: Favorite) {
+        _uiState.value = _uiState.value.copy(favorite = favorite)
+    }
+
+    private fun updateUiStateCurrentLocation(detailResult: Result) {
+        val location =
+            LatLng(detailResult.geometry.location.lat, detailResult.geometry.location.lng)
+        _uiState.value = _uiState.value.copy(currentLocation = location)
+    }
+
+    private fun convertPredictionToFavorite(prediction: Prediction) {
+        _uiState.value = _uiState.value.copy(
+            favorite = Favorite(
+                placeId = prediction.placeId.toInt(),
+                title = prediction.structuredFormatting.mainText,
+                address = prediction.structuredFormatting.secondaryText,
+                content = null,
+                rating = 0,
+                location = _uiState.value.currentLocation
+            )
+        )
+    }
+
+
+    private fun getCoordinates(id: String) {
+        viewModelScope.launch {
+            try {
+                getPlaceDetailsUseCase(id).collect() { details ->
+                    when (details) {
+                        is Resource.Success -> {
+                            updateUiStateCurrentLocation(details.data.result)
+                        }
+
+                        else -> {
+                            Log.i("tag", "when else block, error in getDetailsUseCase")
+                        }
+                    }
+                }
+                isLoading = false
+
+            } catch (e: Exception) {
+                // _eventFlow.emit(UiEvent.ShowSnackbar("Error getting Details."))
+                Log.i("resultTag", "Failed to get details response: ${e.message}")
+            }
+        }
+    }
+
 
     @SuppressLint("MissingPermission")
     fun getCurrentLocation() {
