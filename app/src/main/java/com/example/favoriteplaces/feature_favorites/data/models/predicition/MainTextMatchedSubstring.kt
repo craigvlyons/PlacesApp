@@ -1,9 +1,9 @@
-package com.example.favoriteplaces.feature_favorites.data.models
+package com.example.favoriteplaces.feature_favorites.data.models.predicition
 
 
 import com.google.gson.annotations.SerializedName
 
-data class MatchedSubstring(
+data class MainTextMatchedSubstring(
     @SerializedName("length")
     val length: Int,
     @SerializedName("offset")

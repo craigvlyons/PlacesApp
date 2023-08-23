@@ -24,7 +24,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.favoriteplaces.feature_favorites.domain.model.Favorite
-import com.google.android.gms.maps.model.LatLng
 
 @Composable
 fun FavoriteItem(
@@ -109,12 +108,14 @@ fun FavoriteItem(
 @Composable
 fun PreviewFavorite(){
     FavoriteItem(favorite = Favorite(
+        id= 0,
         title = "place to eat",
         address = "1111 main street, colorado springs, CO 80903",
-        placeId = 123456789,
+        placeId = "123456789",
         content = "would i eat here again?",
-        location = LatLng(364758.0,3846539.0),
-        rating = 3
+        rating = 3,
+        latitude = 364758.0,
+        longitude = 3846539.0,
     )
     ) {
 

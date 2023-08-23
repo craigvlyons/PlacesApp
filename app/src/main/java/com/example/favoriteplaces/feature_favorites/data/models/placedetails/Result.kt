@@ -5,55 +5,55 @@ import com.google.gson.annotations.SerializedName
 
 data class Result(
     @SerializedName("address_components")
-    val addressComponents: List<AddressComponent>,
+    val addressComponents: List<AddressComponent>?,
     @SerializedName("adr_address")
-    val adrAddress: String,
+    val adrAddress: String?,
     @SerializedName("business_status")
-    val businessStatus: String,
+    val businessStatus: String?,
     @SerializedName("current_opening_hours")
-    val currentOpeningHours: CurrentOpeningHours,
+    val currentOpeningHours: CurrentOpeningHours?,
     @SerializedName("formatted_address")
-    val formattedAddress: String,
+    val formattedAddress: String?,
     @SerializedName("formatted_phone_number")
-    val formattedPhoneNumber: String,
+    val formattedPhoneNumber: String?,
     @SerializedName("geometry")
-    val geometry: Geometry,
+    val geometry: Geometry?,
     @SerializedName("icon")
-    val icon: String,
+    val icon: String?,
     @SerializedName("icon_background_color")
-    val iconBackgroundColor: String,
+    val iconBackgroundColor: String?,
     @SerializedName("icon_mask_base_uri")
-    val iconMaskBaseUri: String,
+    val iconMaskBaseUri: String?,
     @SerializedName("international_phone_number")
-    val internationalPhoneNumber: String,
+    val internationalPhoneNumber: String?,
     @SerializedName("name")
-    val name: String,
+    val name: String?,
     @SerializedName("opening_hours")
-    val openingHours: OpeningHours,
+    val openingHours: OpeningHours?,
     @SerializedName("photos")
-    val photos: List<Photo>,
+    val photos: List<Photo>?,
     @SerializedName("place_id")
-    val placeId: String,
+    val placeId: String?,
     @SerializedName("plus_code")
-    val plusCode: PlusCode,
+    val plusCode: PlusCode?,
     @SerializedName("rating")
-    val rating: Int,
+    val rating: Int?,
     @SerializedName("reference")
-    val reference: String,
+    val reference: String?,
     @SerializedName("reviews")
-    val reviews: List<Review>,
+    val reviews: List<Review>?,
     @SerializedName("types")
-    val types: List<String>,
+    val types: List<String>?,
     @SerializedName("url")
-    val url: String,
+    val url: String?,
     @SerializedName("user_ratings_total")
-    val userRatingsTotal: Int,
+    val userRatingsTotal: Int?,
     @SerializedName("utc_offset")
-    val utcOffset: Int,
+    val utcOffset: Int?,
     @SerializedName("vicinity")
-    val vicinity: String,
+    val vicinity: String?,
     @SerializedName("website")
-    val website: String,
+    val website: String?,
     @SerializedName("wheelchair_accessible_entrance")
-    val wheelchairAccessibleEntrance: Boolean
+    val wheelchairAccessibleEntrance: Boolean = false
 )

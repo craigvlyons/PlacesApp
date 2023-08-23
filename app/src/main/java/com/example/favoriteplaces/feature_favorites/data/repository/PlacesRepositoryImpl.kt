@@ -2,8 +2,8 @@ package com.example.favoriteplaces.feature_favorites.data.repository
 
 import android.util.Log
 import com.example.favoriteplaces.feature_favorites.data.data_source.api.GooglePlacesApi
-import com.example.favoriteplaces.feature_favorites.data.models.Prediction
-import com.example.favoriteplaces.feature_favorites.data.models.placedetails.PlaceDetailsModel
+import com.example.favoriteplaces.feature_favorites.data.models.placedetails.Result
+import com.example.favoriteplaces.feature_favorites.data.models.predicition.Prediction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -26,11 +26,13 @@ class PlacesRepositoryImpl @Inject constructor(
         }
     }
 
-    suspend fun getPlaceDetails(placeId: String): Flow<Resource<PlaceDetailsModel>> = flow {
+    suspend fun getPlaceDetails(placeId: String): Flow<Resource<Result>> = flow {
         emit(Resource.Loading())
         try {
             val response = api.getPlaceDetails(placeId, key= apiKey)
-            emit(Resource.Success(response))
+            Log.i("resultRepository", "get details status returned: ${response.status}")
+            val details = response.result
+            emit(Resource.Success(details))
         } catch (e: Exception) {
             Log.d("resultRepository", "Exception: $e")
             emit(Resource.Error("Failed to fetch place details: ${e.message}", data = null))

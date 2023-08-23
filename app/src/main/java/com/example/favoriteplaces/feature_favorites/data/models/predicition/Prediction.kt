@@ -1,4 +1,4 @@
-package com.example.favoriteplaces.feature_favorites.data.models
+package com.example.favoriteplaces.feature_favorites.data.models.predicition
 
 import com.google.gson.annotations.SerializedName
 

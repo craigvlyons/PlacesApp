@@ -9,26 +9,32 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
-import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.MarkerInfoWindowContent
+import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
+
 
 @Composable
 fun GoogleMapViewInColumn(
     modifier: Modifier,
-    cameraPositionState: CameraPositionState,
-    location: LatLng,
+    currentLocation: LatLng,
+    updateCameraPosition: (LatLng) -> Unit,
     onMapLoaded: () -> Unit,
 ) {
-    val singaporeState = rememberMarkerState(position = location)
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(currentLocation, 11f)
+    }
+    val locationState = rememberMarkerState(position = cameraPositionState.position.target)
 
     var uiSettings by remember { mutableStateOf(MapUiSettings(compassEnabled = false)) }
+
     var mapProperties by remember {
         mutableStateOf(MapProperties(mapType = MapType.NORMAL))
     }
@@ -40,6 +46,7 @@ fun GoogleMapViewInColumn(
         uiSettings = uiSettings,
         onMapLoaded = onMapLoaded
     ) {
+        updateCameraPosition(currentLocation)
         // Drawing on the map is accomplished with a child-based API
         val markerClick: (Marker) -> Boolean = {
             Log.d("mapTag", "${it.title} was clicked")
@@ -49,8 +56,8 @@ fun GoogleMapViewInColumn(
             false
         }
         MarkerInfoWindowContent(
-            state = singaporeState,
-            title = "Singapore",
+            state = locationState,
+            title = "add title",
             onClick = markerClick,
             draggable = true,
         ) {

@@ -4,8 +4,8 @@ import android.content.Context
 import android.location.Geocoder
 import com.example.favoriteplaces.feature_favorites.data.data_source.api.GooglePlacesApi
 import com.example.favoriteplaces.feature_favorites.data.repository.PlacesRepositoryImpl
-import com.example.favoriteplaces.feature_favorites.domain.use_case.GetPlaceDetailsUseCase
-import com.example.favoriteplaces.feature_favorites.domain.use_case.GetPredictionsUseCase
+import com.example.favoriteplaces.feature_favorites.domain.use_case.apiusecase.GetPlaceDetailsUseCase
+import com.example.favoriteplaces.feature_favorites.domain.use_case.apiusecase.GetPredictionsUseCase
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.net.PlacesClient
@@ -45,13 +45,13 @@ object PlacesModule {
 
     @Provides
     @Singleton
-    fun providesPredictionUseCase(placesRepositoryImpl: PlacesRepositoryImpl) : GetPredictionsUseCase{
+    fun providesPredictionUseCase(placesRepositoryImpl: PlacesRepositoryImpl) : GetPredictionsUseCase {
         return GetPredictionsUseCase(placesRepositoryImpl)
     }
 
     @Provides
     @Singleton
-    fun providesPlacesDetailsUseCase(placesRepositoryImpl: PlacesRepositoryImpl) : GetPlaceDetailsUseCase{
+    fun providesPlacesDetailsUseCase(placesRepositoryImpl: PlacesRepositoryImpl) : GetPlaceDetailsUseCase {
         return GetPlaceDetailsUseCase(placesRepositoryImpl)
     }
 

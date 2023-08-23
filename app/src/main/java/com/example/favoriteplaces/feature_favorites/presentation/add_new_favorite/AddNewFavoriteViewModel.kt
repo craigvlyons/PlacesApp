@@ -8,14 +8,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.toArgb
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.favoriteplaces.feature_favorites.data.models.Prediction
-import com.example.favoriteplaces.feature_favorites.data.models.placedetails.Result
+import com.example.favoriteplaces.feature_favorites.data.models.predicition.Prediction
 import com.example.favoriteplaces.feature_favorites.data.repository.Resource
 import com.example.favoriteplaces.feature_favorites.domain.model.Favorite
-import com.example.favoriteplaces.feature_favorites.domain.use_case.GetPlaceDetailsUseCase
-import com.example.favoriteplaces.feature_favorites.domain.use_case.GetPredictionsUseCase
+import com.example.favoriteplaces.feature_favorites.domain.use_case.apiusecase.GetPlaceDetailsUseCase
+import com.example.favoriteplaces.feature_favorites.domain.use_case.apiusecase.GetPredictionsUseCase
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.model.LatLng
@@ -40,11 +41,14 @@ class AddNewFavoriteViewModel @Inject constructor(
     var locationState by mutableStateOf<LocationState>(LocationState.NoPermission)
     var isLoading = false
 
+    private val _selectedId = MutableLiveData<String>("")
+    var selectedId: LiveData<String> = _selectedId
+
+    private val _currentLocation = mutableStateOf(LatLng(60.6065, -60.6066))
+    val currentLocation: State<LatLng> = _currentLocation
+
     private val _uiState = mutableStateOf(AddNewFavoriteUiState())
     val uiState: State<AddNewFavoriteUiState> = _uiState
-
-
-    private var currentLatLong by mutableStateOf(LatLng(0.0, 0.0))
 
     private val _favoriteTitle = mutableStateOf(
         AddFavoriteTextFieldState(
@@ -53,11 +57,11 @@ class AddNewFavoriteViewModel @Inject constructor(
     )
     val favoriteTitle: State<AddFavoriteTextFieldState> = _favoriteTitle
 
-    //favoriteTitleHint
     private val _favoriteColor = mutableStateOf(Favorite.favoriteColors[0].toArgb())
     val favoriteColor: State<Int> = _favoriteColor
 
     private var job: Job? = null
+    private var locationJob: Job? = null
 
     // one time events, for snackBar.
     private val _eventFlow = MutableSharedFlow<UiEvent>()
@@ -68,6 +72,7 @@ class AddNewFavoriteViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         job?.cancel()
+        locationJob?.cancel()
         viewModelScope.cancel()
     }
 
@@ -93,7 +98,16 @@ class AddNewFavoriteViewModel @Inject constructor(
             }
 
             is AddNewFavoriteEvent.SaveFavorite -> {
-                TODO()
+                convertPredictionToFavorite(event.predictionResult)
+                viewModelScope.launch {
+
+                    _eventFlow.emit(
+                        UiEvent.ShowSnackbar(
+                            message = "Saving " +
+                                    "${_uiState.value.favorite?.title}"
+                        )
+                    )
+                }
             }
 
             is AddNewFavoriteEvent.Search -> {
@@ -102,7 +116,8 @@ class AddNewFavoriteViewModel @Inject constructor(
 
             is AddNewFavoriteEvent.SelectedResult -> {
                 // this is a selected prediction.
-                getCoordinates(event.predictionResult.placeId)
+                updateSelectedId(event.predictionResult.placeId)
+
                 Log.i("result", "prediction Id: ${event.predictionResult.placeId}")
             }
         }
@@ -142,37 +157,72 @@ class AddNewFavoriteViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(favorite = favorite)
     }
 
-    private fun updateUiStateCurrentLocation(detailResult: Result) {
-        val location =
-            LatLng(detailResult.geometry.location.lat, detailResult.geometry.location.lng)
-        _uiState.value = _uiState.value.copy(currentLocation = location)
+    private fun updateIsMapVisible() {
+        _uiState.value = _uiState.value.copy(
+            isMapVisible = !_uiState.value.isMapVisible
+        )
+        Log.i(
+            "resultDetails",
+            "current location after isMapVisible function: ${_currentLocation.value}"
+        )
+    }
+
+    private fun updateCurrentLocation(newLocation: LatLng) {
+        //_currentLocation.value = newLocation
+        _uiState.value = _uiState.value.copy(
+            isMapVisible = true
+        )
+    }
+
+    private fun updateSelectedId(newSelectedId: String) {
+        _selectedId.value = newSelectedId
+        getCoordinates(newSelectedId)
     }
 
     private fun convertPredictionToFavorite(prediction: Prediction) {
-        _uiState.value = _uiState.value.copy(
-            favorite = Favorite(
-                placeId = prediction.placeId.toInt(),
-                title = prediction.structuredFormatting.mainText,
-                address = prediction.structuredFormatting.secondaryText,
-                content = null,
-                rating = 0,
-                location = _uiState.value.currentLocation
-            )
+        val favorite = Favorite(
+            id = 0,
+            placeId = prediction.placeId,
+            title = prediction.structuredFormatting.mainText,
+            address = prediction.structuredFormatting.secondaryText,
+            content = "",
+            rating = 0,
+            latitude = _currentLocation.value.latitude,
+            longitude = _currentLocation.value.latitude
         )
+        _uiState.value = _uiState.value.copy(
+            favorite = favorite
+        )
+
     }
 
 
     private fun getCoordinates(id: String) {
-        viewModelScope.launch {
+        locationJob?.cancel()
+        locationJob = viewModelScope.launch {
             try {
                 getPlaceDetailsUseCase(id).collect() { details ->
+                    Log.i("resultDetails", "Details from useCase collect: ${details} ")
                     when (details) {
                         is Resource.Success -> {
-                            updateUiStateCurrentLocation(details.data.result)
+                            val location = details.data.geometry?.location?.let {
+                                LatLng(
+                                    it.lat,
+                                    it.lng
+                                )
+                            }
+                            Log.i("resultDetails", "Location should print below")
+                            if (location != null) {
+                                _currentLocation.value = location
+                                Log.i(
+                                    "resultDetails",
+                                    "Location from useCase collect: ${location} "
+                                )
+                            }
                         }
 
                         else -> {
-                            Log.i("tag", "when else block, error in getDetailsUseCase")
+                            Log.i("resultDetails", "when else block, error in getDetailsUseCase ")
                         }
                     }
                 }
@@ -180,8 +230,10 @@ class AddNewFavoriteViewModel @Inject constructor(
 
             } catch (e: Exception) {
                 // _eventFlow.emit(UiEvent.ShowSnackbar("Error getting Details."))
-                Log.i("resultTag", "Failed to get details response: ${e.message}")
+                Log.i("resultDetails", "Failed to get details response: ${e.message}")
             }
+            Log.i("resultDetails", "current location after function: ${_currentLocation.value}")
+            updateIsMapVisible()
         }
     }
 
@@ -195,7 +247,7 @@ class AddNewFavoriteViewModel @Inject constructor(
                     if (location == null && locationState !is LocationState.LocationAvailable) {
                         LocationState.Error
                     } else {
-                        currentLatLong = LatLng(location.latitude, location.longitude)
+                        _currentLocation.value = LatLng(location.latitude, location.longitude)
                         LocationState.LocationAvailable(
                             LatLng(
                                 location.latitude,

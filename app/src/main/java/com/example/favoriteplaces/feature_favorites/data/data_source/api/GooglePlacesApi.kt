@@ -1,6 +1,6 @@
 package com.example.favoriteplaces.feature_favorites.data.data_source.api
 
-import com.example.favoriteplaces.feature_favorites.data.models.PlacesResponseModel
+import com.example.favoriteplaces.feature_favorites.data.models.predicition.PlacesResponseModel
 import com.example.favoriteplaces.feature_favorites.data.models.placedetails.PlaceDetailsModel
 import retrofit2.http.GET
 import retrofit2.http.Query
