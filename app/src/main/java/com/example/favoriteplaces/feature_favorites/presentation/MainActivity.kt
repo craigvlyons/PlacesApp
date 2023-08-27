@@ -5,10 +5,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.favoriteplaces.feature_favorites.presentation.add_new_favorite.composables.AddNewFavorite
+import com.example.favoriteplaces.feature_favorites.presentation.edit_favorite.composables.EditFavoriteScreen
 import com.example.favoriteplaces.feature_favorites.presentation.favorites.composables.FavoritesScreen
 import com.example.favoriteplaces.feature_favorites.presentation.util.Screen
 import com.example.favoriteplaces.ui.theme.FavoritePlacesTheme
@@ -39,7 +42,27 @@ class MainActivity : ComponentActivity()  {
                         }
 
                         composable(route = Screen.AddNewFavoriteScreen.route){
-                            AddNewFavorite()
+                            AddNewFavorite(navController = navController, context = applicationContext)
+                        }
+
+                        composable(route = Screen.EditFavoriteScreen.route + "?favoriteId={favoriteId}&favoriteColor={favoriteColor}",
+                            arguments = listOf(
+                                navArgument(
+                                    name = "favoriteId"
+                                ){
+                                    type = NavType.IntType
+                                    defaultValue = -1
+                                },
+                                navArgument(
+                                    name = "favoriteColor"
+                                ){
+                                    type = NavType.IntType
+                                    defaultValue = -1
+                                },
+                            )
+                            ){
+                            val color = it.arguments?.getInt("favoriteColor") ?: -1
+                            EditFavoriteScreen(navController = navController, favoriteColor = color)
                         }
 
                     }

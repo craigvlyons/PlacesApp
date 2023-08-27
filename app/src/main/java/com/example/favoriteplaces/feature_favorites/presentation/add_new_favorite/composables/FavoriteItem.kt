@@ -1,7 +1,6 @@
 package com.example.favoriteplaces.feature_favorites.presentation.add_new_favorite.composables
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -34,21 +33,21 @@ fun FavoriteItem(
 ) {
     Box(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.primary)
+            .background(Color(favorite.color))
             ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
                 //.padding(end = 32.dp)
-                .border(1.dp, Color.Blue)
+                //.border(1.dp, Color.Blue)
         ) {
             Text(
                 modifier = Modifier
                     .padding(start = 16.dp),
                 text = favorite.title,
                 style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.tertiary,
+                color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -57,8 +56,8 @@ fun FavoriteItem(
                 modifier = Modifier.fillMaxWidth()
                     .padding(10.dp),
                 text = favorite.address,
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.White,
+                style = MaterialTheme.typography.bodyLarge  ,
+                color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
@@ -68,24 +67,14 @@ fun FavoriteItem(
                     modifier = Modifier.fillMaxWidth()
                         .padding(10.dp),
                     text = favorite.content,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
             }
             // add Map.
 
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(10.dp),
-                text = "Location: $favorite.location",
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.White,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis
-            )
         }
 
             IconButton(
@@ -114,6 +103,7 @@ fun PreviewFavorite(){
         placeId = "123456789",
         content = "would i eat here again?",
         rating = 3,
+        city = "",
         latitude = 364758.0,
         longitude = 3846539.0,
     )

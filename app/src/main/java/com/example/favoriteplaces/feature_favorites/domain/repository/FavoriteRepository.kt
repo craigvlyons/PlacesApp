@@ -10,5 +10,11 @@ interface FavoriteRepository {
 
     suspend fun insertFavorite(favorite: Favorite)
 
+    suspend fun updateIsFavorite(id: Int, isFavorite: Boolean)
+
     suspend fun deleteFavorite(favorite: Favorite)
+
+    fun getAllCities(): Flow<List<String>>?
+
+    fun getFavoritesByCityAndColor(city: String, color: Int): Flow<List<Favorite>>?
 }

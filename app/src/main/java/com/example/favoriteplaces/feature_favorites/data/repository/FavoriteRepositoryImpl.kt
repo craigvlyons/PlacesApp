@@ -20,8 +20,23 @@ class FavoriteRepositoryImpl(
         dao.insertFavorite(favorite)
     }
 
+    override suspend fun updateIsFavorite(id: Int, isFavorite: Boolean) {
+        dao.updateIsFavorite(id , isFavorite)
+    }
+
     override suspend fun deleteFavorite(favorite: Favorite) {
         dao.deleteFavorite(favorite)
+    }
+
+    override fun getAllCities(): Flow<List<String>>? {
+        return dao.getAllCities()
+    }
+
+    override fun getFavoritesByCityAndColor(
+        city: String,
+        color: Int
+    ): Flow<List<Favorite>>? {
+        return dao.getFavoritesByCityAndColor(city, color)
     }
 
 }

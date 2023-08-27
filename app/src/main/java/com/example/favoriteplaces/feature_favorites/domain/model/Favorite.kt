@@ -9,24 +9,24 @@ import com.example.favoriteplaces.ui.theme.LightGreen
 import com.example.favoriteplaces.ui.theme.RedOrange
 import com.example.favoriteplaces.ui.theme.RedPink
 import com.example.favoriteplaces.ui.theme.Violet
-import com.example.favoriteplaces.ui.theme.primary400
 
 @Entity
 data class Favorite(
     @PrimaryKey
-    val id : Int? = null,
+    var id : Int? = null,
     val placeId : String? = "",
     val title: String,
     val address: String,
     val content: String?,
     val rating: Int?,
     val isFavorite: Boolean = false,
-    val color: Int = favoriteColors[4].toArgb() ,
+    val color: Int = favoriteColors[3].toArgb(),
+    val city: String,
     val latitude: Double,
     val longitude: Double
 ){
     companion object {
-        val favoriteColors = listOf(primary400, RedOrange, LightGreen, Violet, BabyBlue, RedPink)
+        val favoriteColors = listOf(RedOrange, LightGreen, Violet, BabyBlue, RedPink)
     }
 }
 

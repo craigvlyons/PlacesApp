@@ -2,6 +2,7 @@ package com.example.favoriteplaces.feature_favorites.presentation.add_new_favori
 
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -35,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.example.favoriteplaces.feature_favorites.presentation.add_new_favorite.AddNewFavoriteEvent
 import com.example.favoriteplaces.feature_favorites.presentation.add_new_favorite.AddNewFavoriteViewModel
 import com.google.android.gms.maps.model.CameraPosition
@@ -45,6 +47,8 @@ import kotlinx.coroutines.flow.collectLatest
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun AddNewFavorite(
+    navController: NavController,
+    context: Context,
     viewModel: AddNewFavoriteViewModel = hiltViewModel()
 ) {
     val searchString = viewModel.favoriteTitle.value
@@ -84,7 +88,7 @@ fun AddNewFavorite(
                 }
 
                 is AddNewFavoriteViewModel.UiEvent.SaveFavorite -> {
-                    //navController.navigateUp()
+                    navController.navigateUp()
                 }
 
                 else -> {  }
@@ -119,7 +123,7 @@ fun AddNewFavorite(
                         },
                         onFocusChange = { viewModel.onEvent(AddNewFavoriteEvent.ChangeSearchFocus(it)) },
                         isHintVisible = searchString.isHintVisible,
-                        textStyle = androidx.compose.material.MaterialTheme.typography.body1,
+                        textStyle = androidx.compose.material.MaterialTheme.typography.h2,
                         modifier = Modifier
                             .padding(10.dp),
                     )
@@ -135,12 +139,13 @@ fun AddNewFavorite(
                     Button(
                         modifier = Modifier
                             .background(MaterialTheme.colorScheme.primary)
-                            .border(1.dp, Color.DarkGray, shape = RoundedCornerShape(size = 20.dp)),
+                            .border(0.5.dp, Color.DarkGray, shape = RoundedCornerShape(size = 20.dp)),
                         onClick = { viewModel.onEvent(AddNewFavoriteEvent.Search) },
 
                         ) {
                         Text(
-                            text = "Search"
+                            text = "Search",
+                            style = MaterialTheme.typography.titleMedium ,
                         )
                     }
                 }

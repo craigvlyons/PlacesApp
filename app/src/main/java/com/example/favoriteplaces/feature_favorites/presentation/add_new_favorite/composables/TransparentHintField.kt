@@ -39,7 +39,7 @@ fun TransparentHintField(
     Box(
         modifier = modifier
             //.padding(10.dp)
-            .border(1.dp, Color.DarkGray, RoundedCornerShape(size = 16.dp))
+            .border(0.5.dp, Color.DarkGray, RoundedCornerShape(size = 16.dp))
     ) {
         Row(
             modifier = Modifier

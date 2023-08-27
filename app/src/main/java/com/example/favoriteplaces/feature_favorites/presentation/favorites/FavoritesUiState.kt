@@ -6,7 +6,9 @@ import com.example.favoriteplaces.feature_favorites.presentation.util.OrderType
 
 data class FavoritesUiState(
     val favorites: List<Favorite> = emptyList(),
-    val favoriteOrder: FavoriteOrder = FavoriteOrder.Title(OrderType.Descending),
+    val favoriteOrder: FavoriteOrder = FavoriteOrder.City(OrderType.Descending),
     val isOrderSelectionVisible: Boolean = false,
+    val isListView: Boolean = true,
+    val isCardView: Boolean = false,
     val isMapSectionVisible: Boolean = false,
 )

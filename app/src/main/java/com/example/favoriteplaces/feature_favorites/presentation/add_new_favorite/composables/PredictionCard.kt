@@ -121,7 +121,7 @@ fun PredictionCard(
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
-
+            Spacer(modifier = Modifier.height(4.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -137,7 +137,7 @@ fun PredictionCard(
 
             // Show map if selected
             if (selectedId == prediction.placeId && mapVisible) {
-                Text(text = "Marker Location : $markerLocation")
+                // Text(text = "Marker Location : $markerLocation")
                 Spacer(modifier = Modifier.height(8.dp))
                 Box(
                     Modifier
@@ -181,8 +181,20 @@ fun PredictionCard(
 
 
                 }
-                Row(){
-                    Button(onClick = { saveLocation() }) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ){
+                    Button(
+                        modifier = Modifier
+                            .padding(0.dp)
+                            .border(
+                                0.5.dp,
+                                Color.DarkGray,
+                                shape = RoundedCornerShape(size = 20.dp)
+                            ),
+                        onClick = { saveLocation() }) {
                         Text(text = "Save Favorite")
                     }
                 }

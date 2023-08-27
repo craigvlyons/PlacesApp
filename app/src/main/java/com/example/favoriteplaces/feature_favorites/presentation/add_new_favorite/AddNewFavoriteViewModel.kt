@@ -17,6 +17,7 @@ import com.example.favoriteplaces.feature_favorites.data.repository.Resource
 import com.example.favoriteplaces.feature_favorites.domain.model.Favorite
 import com.example.favoriteplaces.feature_favorites.domain.use_case.apiusecase.GetPlaceDetailsUseCase
 import com.example.favoriteplaces.feature_favorites.domain.use_case.apiusecase.GetPredictionsUseCase
+import com.example.favoriteplaces.feature_favorites.domain.use_case.localusecase.FavoriteUseCases
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.model.LatLng
@@ -36,7 +37,8 @@ class AddNewFavoriteViewModel @Inject constructor(
     private val fusedLocationClient: FusedLocationProviderClient,
     private val geoCoder: Geocoder,
     private val getPredictionsUseCase: GetPredictionsUseCase,
-    private val getPlaceDetailsUseCase: GetPlaceDetailsUseCase
+    private val getPlaceDetailsUseCase: GetPlaceDetailsUseCase,
+    private val favoriteUseCases: FavoriteUseCases
 ) : ViewModel() {
     var locationState by mutableStateOf<LocationState>(LocationState.NoPermission)
     var isLoading = false
@@ -46,6 +48,9 @@ class AddNewFavoriteViewModel @Inject constructor(
 
     private val _currentLocation = mutableStateOf(LatLng(60.6065, -60.6066))
     val currentLocation: State<LatLng> = _currentLocation
+
+    private val _formattedAddress = mutableStateOf("")
+    val formattedAddress: State<String> = _formattedAddress
 
     private val _uiState = mutableStateOf(AddNewFavoriteUiState())
     val uiState: State<AddNewFavoriteUiState> = _uiState
@@ -100,13 +105,16 @@ class AddNewFavoriteViewModel @Inject constructor(
             is AddNewFavoriteEvent.SaveFavorite -> {
                 convertPredictionToFavorite(event.predictionResult)
                 viewModelScope.launch {
-
-                    _eventFlow.emit(
-                        UiEvent.ShowSnackbar(
-                            message = "Saving " +
-                                    "${_uiState.value.favorite?.title}"
+                    try {
+                        _uiState.value.favorite?.let { favoriteUseCases.addFavorite(it) }
+                        _eventFlow.emit(UiEvent.SaveFavorite)
+                    }catch (e:Exception){
+                        _eventFlow.emit(
+                            UiEvent.ShowSnackbar(
+                                message = "Error saving: ${e.message}"
+                            )
                         )
-                    )
+                    }
                 }
             }
 
@@ -180,19 +188,23 @@ class AddNewFavoriteViewModel @Inject constructor(
     }
 
     private fun convertPredictionToFavorite(prediction: Prediction) {
+        val addressList = _formattedAddress.value.split(",")
+        val city = addressList[1]
         val favorite = Favorite(
-            id = 0,
+            id = null,
             placeId = prediction.placeId,
             title = prediction.structuredFormatting.mainText,
-            address = prediction.structuredFormatting.secondaryText,
+            address = _formattedAddress.value,
             content = "",
             rating = 0,
+            city = city,
             latitude = _currentLocation.value.latitude,
             longitude = _currentLocation.value.latitude
         )
         _uiState.value = _uiState.value.copy(
             favorite = favorite
         )
+        Log.i("resultFavorite","favorite: ${_uiState.value.favorite}")
 
     }
 
@@ -211,6 +223,11 @@ class AddNewFavoriteViewModel @Inject constructor(
                                     it.lng
                                 )
                             }
+                            val address = details.data.formattedAddress
+                            if (address != null) {
+                                _formattedAddress.value = address
+                            }
+
                             Log.i("resultDetails", "Location should print below")
                             if (location != null) {
                                 _currentLocation.value = location

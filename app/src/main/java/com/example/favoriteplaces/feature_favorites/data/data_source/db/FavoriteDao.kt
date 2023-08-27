@@ -19,6 +19,15 @@ interface FavoriteDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFavorite(favorite: Favorite)
 
+    @Query("UPDATE Favorite SET isFavorite = :isFavorite WHERE id = :id")
+    suspend fun updateIsFavorite( id: Int, isFavorite: Boolean )
+
     @Delete
     suspend fun deleteFavorite(favorite: Favorite)
+
+    @Query("SELECT DISTINCT city FROM Favorite")
+    fun getAllCities(): Flow<List<String>>?
+
+    @Query("SELECT * FROM Favorite WHERE city = :city AND color = :color")
+    fun getFavoritesByCityAndColor(city: String, color: Int): Flow<List<Favorite>>?
 }
