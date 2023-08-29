@@ -40,6 +40,9 @@ class EditFavoriteViewModel @Inject constructor(
     private val _favoriteRating = mutableStateOf(0)
     val favoriteRating: State<Int> = _favoriteRating
 
+    private val _favoriteCity = mutableStateOf("")
+    val favoriteCity: State<String> = _favoriteCity
+
     private var _address = mutableStateOf(emptyList<String>())
     val address: State<List<String>> = _address
 
@@ -83,7 +86,9 @@ class EditFavoriteViewModel @Inject constructor(
                             _favoriteColor.value = newFavorite.color
                             _favoriteRating.value = newFavorite.rating!!
                             _address.value = newFavorite.address.split(",").toMutableList()
+                            _favoriteCity.value = newFavorite.city
                         }
+
                     } catch (e: Exception) {
                         Log.i("resultFavorite", "failure retrieving favorite by id: ${e.message}")
                         _eventFlow.emit(
@@ -96,6 +101,14 @@ class EditFavoriteViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun updateCity() {
+
+        val cityFromAddress = _address.value[1].trim()
+        _favoriteCity.value = cityFromAddress
+        Log.i("list","city: $cityFromAddress")
+
     }
 
     fun onEvent(event: EditFavoriteEvent) {
@@ -134,11 +147,16 @@ class EditFavoriteViewModel @Inject constructor(
                 _favoriteRating.value = event.rating
             }
 
-            is EditFavoriteEvent.SaveFavorite -> {saveFavorite()}
+            is EditFavoriteEvent.SaveFavorite -> {
+                saveFavorite()
+            }
         }
     }
 
-    private fun saveFavorite(){
+    private fun saveFavorite() {
+        if (_favoriteCity.value.isBlank()){
+            updateCity()
+        }
         val saveFavorite = Favorite(
             id = favoriteState.value.favorite?.id,
             placeId = favoriteState.value.favorite?.placeId,
@@ -148,15 +166,15 @@ class EditFavoriteViewModel @Inject constructor(
             rating = _favoriteRating.value,
             isFavorite = favoriteState.value.favorite!!.isFavorite,
             color = _favoriteColor.value,
-            city = favoriteState.value.favorite!!.city,
+            city = _favoriteCity.value,
             latitude = favoriteState.value.favorite!!.latitude,
             longitude = favoriteState.value.favorite!!.longitude
         )
         viewModelScope.launch {
             try {
-            favoriteUseCases.addFavorite(saveFavorite)
+                favoriteUseCases.addFavorite(saveFavorite)
                 _eventFlow.emit(UiEvent.SaveFavorite)
-            }catch (e:Exception){
+            } catch (e: Exception) {
                 _eventFlow.emit(
                     UiEvent.ShowSnackbar(
                         message = e.message ?: "Couldn't save Favorite."

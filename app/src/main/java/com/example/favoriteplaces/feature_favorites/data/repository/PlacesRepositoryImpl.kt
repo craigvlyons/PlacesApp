@@ -13,10 +13,10 @@ class PlacesRepositoryImpl @Inject constructor(
     private val apiKey: String
 ) {
 
-    suspend fun getPredictions(input: String): Flow<Resource<List<Prediction>>> = flow {
+    suspend fun getPredictions(input: String, location: String): Flow<Resource<List<Prediction>>> = flow {
         emit(Resource.Loading())
         try {
-            val response = api.getPredictions(input = input, apiKey)
+            val response = api.getPredictions(input = input, apiKey, location = location)
             val prediction = response.predictions
             Log.i("results", "predictions: $prediction")
             emit(Resource.Success(prediction))

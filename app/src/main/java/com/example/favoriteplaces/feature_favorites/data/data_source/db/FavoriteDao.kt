@@ -28,6 +28,9 @@ interface FavoriteDao {
     @Query("SELECT DISTINCT city FROM Favorite")
     fun getAllCities(): Flow<List<String>>?
 
+    @Query("SELECT DISTINCT color FROM Favorite")
+    fun getAllColors(): Flow<List<Int>>?
+
     @Query("SELECT * FROM Favorite WHERE city = :city AND color = :color")
     fun getFavoritesByCityAndColor(city: String, color: Int): Flow<List<Favorite>>?
 }

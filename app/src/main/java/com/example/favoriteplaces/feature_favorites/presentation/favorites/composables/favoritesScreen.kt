@@ -10,6 +10,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -96,8 +97,6 @@ fun FavoritesScreen(
                 onClick = {
                     navController.navigate(Screen.AddNewFavoriteScreen.route)
                 },
-
-                //backgroundColor = Color.White,
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
@@ -114,7 +113,8 @@ fun FavoritesScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            Row(modifier = Modifier.fillMaxWidth(),
+            Row(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -158,38 +158,71 @@ fun FavoritesScreen(
             }
 
             Spacer(modifier = Modifier.height(6.dp))
-            LazyColumn(
+            Box(
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(state.favorites) { favorite ->
-                    FavoriteItem(
-                        favorite = favorite,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                       navController.navigate(Screen.EditFavoriteScreen.route + "?favoriteId=${favorite.id}&favoriteColor=${favorite.color}")
-                            },
-                        onDeleteClick = {
-                            viewModel.onEvent( FavoritesEvent.DeleteFavorite(favorite))
-                            scope.launch {
-                                val result = scaffoldState.snackbarHostState.showSnackbar(
-                                    message = "Favorite has been deleted",
-                                    actionLabel = "Undo"
-                                )
-                                if (result == SnackbarResult.ActionPerformed) {
-                                    viewModel.onEvent(FavoritesEvent.RestoreFavorite)
+                if (state.isListView) { // show state.cityColorList as FavoriteListView
+                    LazyColumn() {
+
+                        items(state.cityColorList) { cities ->
+                            cities.colorVariations.forEach { colorVariation ->
+                                if (!colorVariation.favorites.isNullOrEmpty()) {
+                                    FavoriteListView(
+                                        city = cities.city,
+                                        favoritesList = colorVariation,
+                                        onEditSelect = { favorite ->
+                                            navController.navigate(Screen.EditFavoriteScreen.route + "?favoriteId=${favorite.id}&favoriteColor=${favorite.color}")
+                                        },
+                                        onMapSelect = {}
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
                                 }
                             }
-                        },
-                        onLovedClick = { isFavorite -> viewModel.onEvent(FavoritesEvent.LovedFavorite(favorite.id!!, isFavorite )) }
-                    )
+                        }
+                    }
+                }   // ListView
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                // show state. favorites in FavoriteItem
+                if (state.isCardView) {
+                    LazyColumn() {
+                        items(state.favorites) { favorite ->
+                            FavoriteItem(
+                                favorite = favorite,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        navController.navigate(Screen.EditFavoriteScreen.route + "?favoriteId=${favorite.id}&favoriteColor=${favorite.color}")
+                                    },
+                                onDeleteClick = {
+                                    viewModel.onEvent(FavoritesEvent.DeleteFavorite(favorite))
+                                    scope.launch {
+                                        val result = scaffoldState.snackbarHostState.showSnackbar(
+                                            message = "Favorite has been deleted",
+                                            actionLabel = "Undo"
+                                        )
+                                        if (result == SnackbarResult.ActionPerformed) {
+                                            viewModel.onEvent(FavoritesEvent.RestoreFavorite)
+                                        }
+                                    }
+                                },
+                                onLovedClick = { isFavorite ->
+                                    viewModel.onEvent(
+                                        FavoritesEvent.LovedFavorite(
+                                            favorite.id!!,
+                                            isFavorite
+                                        )
+                                    )
+                                }
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+                    }
                 }
-            }
-
+            }  // card View
         }
     }
-
-
 }
+
+
+
+

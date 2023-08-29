@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 class GetPredictionsUseCase(
     private val placesRepositoryImpl: PlacesRepositoryImpl
 )  {
-    suspend operator fun invoke(input: String) : Flow<Resource<List<Prediction>>> {
-        return placesRepositoryImpl.getPredictions(input)
+    suspend operator fun invoke(input: String, location: String) : Flow<Resource<List<Prediction>>> {
+        return placesRepositoryImpl.getPredictions(input, location)
     }
 }

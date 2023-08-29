@@ -1,11 +1,10 @@
 package com.example.favoriteplaces.feature_favorites.presentation.add_new_favorite.composables
 
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.Button
@@ -33,12 +31,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.favoriteplaces.feature_favorites.presentation.add_new_favorite.AddNewFavoriteEvent
 import com.example.favoriteplaces.feature_favorites.presentation.add_new_favorite.AddNewFavoriteViewModel
+import com.example.favoriteplaces.feature_favorites.presentation.add_new_favorite.LocationPermissionState
+import com.example.favoriteplaces.feature_favorites.presentation.sharedcomposables.PermissionUI
+import com.example.favoriteplaces.feature_favorites.presentation.util.PermissionAction
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.flow.collectLatest
@@ -53,9 +54,34 @@ fun AddNewFavorite(
 ) {
     val searchString = viewModel.favoriteTitle.value
     val uiState by viewModel.uiState
-    val currentLocation by viewModel.currentLocation
 
+    val locationPermissionState = viewModel.locationState
+    val currentLocation by viewModel.currentLocation
     val scaffoldState = rememberScaffoldState()
+    val context = LocalContext.current
+
+    when (locationPermissionState) {
+        is LocationPermissionState.RequestPermission -> {
+            // Request permission here
+            // For example, you can trigger the permission request when the composable is first launched
+            //viewModel.onEvent(AddNewFavoriteEvent.RequestLocationPermission)
+        }
+        is LocationPermissionState.LocationLoading -> {
+            // Display loading state if needed
+            Text("Loading location...")
+        }
+        is LocationPermissionState.LocationAvailable -> {
+            // Location permission granted, proceed with your UI
+            // You can use locationPermissionState.location to access the location
+        }
+        is LocationPermissionState.Error -> {
+            // Handle permission denied or error state
+            // For example, show a message to the user
+            Text("Location permission denied")
+        }
+        else -> {}
+    }
+
 
     // Observing and controlling the camera's state can be done with a CameraPositionState
     val cameraPositionState = rememberCameraPositionState {
@@ -74,7 +100,15 @@ fun AddNewFavorite(
             Log.d("mapTag", "Map camera stopped moving - Enabling column scrolling...")
         }
     }
+    // Check if location permission is requested
+    val isRequestingLocationPermission = locationPermissionState is LocationPermissionState.RequestPermission
 
+    // Request location permission when the composable is first launched
+    LaunchedEffect(isRequestingLocationPermission) {
+        if (isRequestingLocationPermission) {
+            viewModel.onEvent(AddNewFavoriteEvent.RequestLocationPermission)
+        }
+    }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(key1 = true) {
@@ -99,14 +133,29 @@ fun AddNewFavorite(
     Scaffold(
         scaffoldState = scaffoldState
     ) {
-
-
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.primary)
         ) {
-
+            // Show the PermissionUI if permission is requested
+            if (isRequestingLocationPermission) {
+                PermissionUI(
+                    context = context,
+                    permission = Manifest.permission.ACCESS_FINE_LOCATION,
+                    permissionRationale = "We need location permission to provide accurate results.",
+                    scaffoldState = scaffoldState,
+                    permissionAction = { action ->
+                        when (action) {
+                            PermissionAction.OnPermissionGranted -> {
+                                viewModel.onLocationPermissionResult(true)
+                            }
+                            PermissionAction.OnPermissionDenied -> {
+                                viewModel.onLocationPermissionResult(false)
+                            }
+                        }
+                    }
+                )
+            }
             Column(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -118,9 +167,7 @@ fun AddNewFavorite(
                     TransparentHintField(
                         text = searchString.text,
                         hint = searchString.hint,
-                        onValueChange = { newValue ->
-                            viewModel.onEvent(AddNewFavoriteEvent.EnteredSearch(newValue))
-                        },
+                        onValueChange = { viewModel.onEvent(AddNewFavoriteEvent.EnteredSearch(it)) },
                         onFocusChange = { viewModel.onEvent(AddNewFavoriteEvent.ChangeSearchFocus(it)) },
                         isHintVisible = searchString.isHintVisible,
                         textStyle = androidx.compose.material.MaterialTheme.typography.h2,
@@ -128,18 +175,14 @@ fun AddNewFavorite(
                             .padding(10.dp),
                     )
                 }
-                // Spacer(modifier = Modifier.height(6.dp))
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(end = 10.dp),
                     horizontalArrangement = Arrangement.End
                 ) {
-
                     Button(
-                        modifier = Modifier
-                            .background(MaterialTheme.colorScheme.primary)
-                            .border(0.5.dp, Color.DarkGray, shape = RoundedCornerShape(size = 20.dp)),
+                        modifier = Modifier,
                         onClick = { viewModel.onEvent(AddNewFavoriteEvent.Search) },
 
                         ) {
@@ -149,8 +192,7 @@ fun AddNewFavorite(
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(6.dp))
-
+                // Spacer(modifier = Modifier.height(3.dp))
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -187,13 +229,7 @@ fun AddNewFavorite(
                         Spacer(modifier = Modifier.height(15.dp))
                     }
                 }
-
             }
-
-
         }
-
-
     }
-
 }

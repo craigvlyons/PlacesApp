@@ -11,4 +11,5 @@ sealed class AddNewFavoriteEvent {
 
     object ToggleMapSelection: AddNewFavoriteEvent()
     object Search: AddNewFavoriteEvent()
+    object RequestLocationPermission: AddNewFavoriteEvent()
 }

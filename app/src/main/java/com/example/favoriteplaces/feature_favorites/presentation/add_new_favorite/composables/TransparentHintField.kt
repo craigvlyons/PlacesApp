@@ -47,29 +47,31 @@ fun TransparentHintField(
                 .height(35.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = "Search",
-                tint = Color.White
+                tint = Color.Black
             )
             Spacer(modifier = Modifier.width(6.dp))
             BasicTextField(
                 value = text,
                 onValueChange = onValueChange,
                 singleLine = singleLine,
-                textStyle = TextStyle(color = Color.White, fontSize = 20.sp),
+                textStyle = TextStyle(color = Color.Black, fontSize = 20.sp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .onFocusChanged { onFocusChange(it) },
             )
-            if (isHintVisible) {
-                Text(
-                    text = hint,
-                    style = textStyle,
-                    color = Color.LightGray,
-                )
-            }
+        }
+        if (isHintVisible) {
+            Text(
+                modifier = Modifier
+                    .padding(start = 35.dp)
+                    .align(Alignment.CenterStart),
+                text = hint,
+                style = TextStyle(fontSize = 20.sp),
+                color = Color.LightGray,
+            )
         }
     }
 

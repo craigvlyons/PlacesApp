@@ -93,6 +93,7 @@ dependencies {
     // google maps, places
     implementation ("com.google.maps.android:maps-compose:2.13.0")
     implementation ("com.google.android.gms:play-services-maps:18.1.0")
+    //implementation ("com.google.android.gms:play-services-location:21.0.1")
     implementation ("com.google.maps.android:maps-ktx:3.4.0")
     implementation ("com.google.android.libraries.places:places:3.2.0")
 

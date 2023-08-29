@@ -6,6 +6,6 @@ data class FavoriteUseCases(
     val deleteFavorite: DeleteFavoriteUseCase,
     val updateIsFavorite: UpdateIsFavorite,
     val addFavorite: AddFavoriteUseCase,
-    val getAllCitiesUseCase: GetAllCitiesUseCase,
-    val getFavoritesByCityAndColorUseCase: GetFavoritesByCityAndColorUseCase
+    val getAllCities: GetAllCitiesUseCase,
+    val getFavoritesByCityAndColor: GetFavoritesByCityAndColorUseCase
     )

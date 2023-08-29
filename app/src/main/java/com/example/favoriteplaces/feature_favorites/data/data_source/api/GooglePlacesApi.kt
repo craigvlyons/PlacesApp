@@ -13,7 +13,7 @@ interface GooglePlacesApi {
         @Query("key") key: String ,
         @Query("types") types: String = "establishment",    //"bar|restaurant|food|point_of_interest|establishment",
         @Query("components") components: String = "country:us",
-        @Query("location") location: String = "38.8434428,-104.8274974",
+        @Query("location") location: String, // = "0.0,0.0",
         @Query("radius") radius: String = "75",
     ): PlacesResponseModel
 

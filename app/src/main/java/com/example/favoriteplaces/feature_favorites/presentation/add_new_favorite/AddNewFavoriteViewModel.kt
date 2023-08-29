@@ -40,13 +40,13 @@ class AddNewFavoriteViewModel @Inject constructor(
     private val getPlaceDetailsUseCase: GetPlaceDetailsUseCase,
     private val favoriteUseCases: FavoriteUseCases
 ) : ViewModel() {
-    var locationState by mutableStateOf<LocationState>(LocationState.NoPermission)
+    var locationState by mutableStateOf<LocationPermissionState>(LocationPermissionState.NoPermission)
     var isLoading = false
 
     private val _selectedId = MutableLiveData<String>("")
     var selectedId: LiveData<String> = _selectedId
 
-    private val _currentLocation = mutableStateOf(LatLng(60.6065, -60.6066))
+    private val _currentLocation = mutableStateOf(LatLng(0.0, -0.0))
     val currentLocation: State<LatLng> = _currentLocation
 
     private val _formattedAddress = mutableStateOf("")
@@ -55,11 +55,9 @@ class AddNewFavoriteViewModel @Inject constructor(
     private val _uiState = mutableStateOf(AddNewFavoriteUiState())
     val uiState: State<AddNewFavoriteUiState> = _uiState
 
-    private val _favoriteTitle = mutableStateOf(
-        AddFavoriteTextFieldState(
+    private val _favoriteTitle = mutableStateOf(AddFavoriteTextFieldState(
             hint = "Search for place..."
-        )
-    )
+        ))
     val favoriteTitle: State<AddFavoriteTextFieldState> = _favoriteTitle
 
     private val _favoriteColor = mutableStateOf(Favorite.favoriteColors[0].toArgb())
@@ -72,6 +70,9 @@ class AddNewFavoriteViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
+    init {
+        getCurrentLocation()
+    }
 
     // Cancel any running coroutine job when ViewModel is cleared
     override fun onCleared() {
@@ -128,20 +129,23 @@ class AddNewFavoriteViewModel @Inject constructor(
 
                 Log.i("result", "prediction Id: ${event.predictionResult.placeId}")
             }
+            is AddNewFavoriteEvent.RequestLocationPermission -> {
+                requestLocationPermission()
+            }
         }
     }
 
     private fun searchPlaces(query: String) {
+        val location: String = LatLng( _currentLocation.value.latitude, _currentLocation.value.longitude).toString()
+        Log.i("location", "Location: ${location}") // location is always "0.0 , 0.0"
         job?.cancel()
-        // updateUiStatePredictions(emptyList())
         job = viewModelScope.launch {
             try {
-                getPredictionsUseCase(query).collect() { response ->
+                getPredictionsUseCase(query, location).collect { response ->
                     when (response) {
                         is Resource.Success -> {
                             updateUiStatePredictions(response.data ?: emptyList())
                         }
-
                         else -> {
                             Log.i("tag", "when else block, error in getPredictionsUseCase")
                         }
@@ -189,7 +193,7 @@ class AddNewFavoriteViewModel @Inject constructor(
 
     private fun convertPredictionToFavorite(prediction: Prediction) {
         val addressList = _formattedAddress.value.split(",")
-        val city = addressList[1]
+        val city = addressList[1].trim()
         val favorite = Favorite(
             id = null,
             placeId = prediction.placeId,
@@ -228,13 +232,8 @@ class AddNewFavoriteViewModel @Inject constructor(
                                 _formattedAddress.value = address
                             }
 
-                            Log.i("resultDetails", "Location should print below")
                             if (location != null) {
                                 _currentLocation.value = location
-                                Log.i(
-                                    "resultDetails",
-                                    "Location from useCase collect: ${location} "
-                                )
                             }
                         }
 
@@ -254,25 +253,43 @@ class AddNewFavoriteViewModel @Inject constructor(
         }
     }
 
+    fun requestLocationPermission() {
+        locationState = LocationPermissionState.RequestPermission
+    }
+    fun onLocationPermissionResult(granted: Boolean) {
+        if (granted) {
+            // Permission granted, start location updates
+            getCurrentLocation()
+        } else {
+            // Handle denied permission
+            locationState = LocationPermissionState.Error
+        }
+    }
 
     @SuppressLint("MissingPermission")
     fun getCurrentLocation() {
-        locationState = LocationState.LocationLoading
+        if (locationState is LocationPermissionState.NoPermission) {
+            requestLocationPermission()
+            return
+        }
+        locationState = LocationPermissionState.LocationLoading
         fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
             .addOnSuccessListener { location ->
-                locationState =
-                    if (location == null && locationState !is LocationState.LocationAvailable) {
-                        LocationState.Error
-                    } else {
+                    if (location != null) {
+                        Log.i("LocationTag", "Location: ${location.latitude}, ${location.longitude}")
                         _currentLocation.value = LatLng(location.latitude, location.longitude)
-                        LocationState.LocationAvailable(
-                            LatLng(
-                                location.latitude,
-                                location.longitude
-                            )
-                        )
+                    } else {
+                        Log.e("LocationTag", "Location is null")
                     }
+                locationState = LocationPermissionState.LocationAvailable(
+                    LatLng(location.latitude, location.longitude)
+                )
             }
+            .addOnFailureListener { e ->
+                Log.e("LocationTag", "Failed to get location: ${e.message}")
+                locationState = LocationPermissionState.Error
+            }
+
     }
 
 

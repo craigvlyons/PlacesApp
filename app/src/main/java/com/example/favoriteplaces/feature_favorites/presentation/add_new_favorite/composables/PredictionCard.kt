@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -111,6 +112,7 @@ fun PredictionCard(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+            Divider(modifier = Modifier , 1.dp  ,Color.DarkGray)
             Spacer(modifier = Modifier.height(8.dp))
             // Address
             Text(
@@ -137,7 +139,7 @@ fun PredictionCard(
 
             // Show map if selected
             if (selectedId == prediction.placeId && mapVisible) {
-                // Text(text = "Marker Location : $markerLocation")
+                //Text(text = "Marker Location : $markerLocation")
                 Spacer(modifier = Modifier.height(8.dp))
                 Box(
                     Modifier

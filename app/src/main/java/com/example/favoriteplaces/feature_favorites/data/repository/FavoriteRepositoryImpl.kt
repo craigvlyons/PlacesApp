@@ -32,6 +32,10 @@ class FavoriteRepositoryImpl(
         return dao.getAllCities()
     }
 
+    override fun getAllColors(): Flow<List<Int>>? {
+        return dao.getAllColors()
+    }
+
     override fun getFavoritesByCityAndColor(
         city: String,
         color: Int

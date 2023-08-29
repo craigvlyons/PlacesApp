@@ -12,6 +12,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.example.favoriteplaces.feature_favorites.domain.model.Favorite
 
 @Composable
-fun FavoriteItem(
+fun BasicFavoriteItem(
     favorite: Favorite,
     modifier: Modifier = Modifier,
     cornerRadius: Dp = 10.dp,
@@ -39,8 +40,6 @@ fun FavoriteItem(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
-                //.padding(end = 32.dp)
-                //.border(1.dp, Color.Blue)
         ) {
             Text(
                 modifier = Modifier
@@ -51,7 +50,8 @@ fun FavoriteItem(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Divider(modifier = Modifier , 1.dp  ,Color.DarkGray)
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 modifier = Modifier.fillMaxWidth()
                     .padding(10.dp),
@@ -96,7 +96,7 @@ fun FavoriteItem(
 @Preview
 @Composable
 fun PreviewFavorite(){
-    FavoriteItem(favorite = Favorite(
+    BasicFavoriteItem(favorite = Favorite(
         id= 0,
         title = "place to eat",
         address = "1111 main street, colorado springs, CO 80903",

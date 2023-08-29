@@ -46,8 +46,8 @@ object FavoritesModule {
             deleteFavorite = DeleteFavoriteUseCase(repository),
             updateIsFavorite = UpdateIsFavorite(repository),
             addFavorite = AddFavoriteUseCase(repository),
-            getAllCitiesUseCase = GetAllCitiesUseCase(repository),
-            getFavoritesByCityAndColorUseCase = GetFavoritesByCityAndColorUseCase(repository)
+            getAllCities = GetAllCitiesUseCase(repository),
+            getFavoritesByCityAndColor = GetFavoritesByCityAndColorUseCase(repository)
         )
     }
 

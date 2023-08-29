@@ -15,6 +15,7 @@ interface FavoriteRepository {
     suspend fun deleteFavorite(favorite: Favorite)
 
     fun getAllCities(): Flow<List<String>>?
+    fun getAllColors(): Flow<List<Int>>?
 
     fun getFavoritesByCityAndColor(city: String, color: Int): Flow<List<Favorite>>?
 }
