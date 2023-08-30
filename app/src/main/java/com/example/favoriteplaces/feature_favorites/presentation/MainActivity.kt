@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.favoriteplaces.feature_favorites.presentation.add_new_favorite.composables.AddNewFavorite
+import com.example.favoriteplaces.feature_favorites.presentation.citymap.composables.CityMapScreen
 import com.example.favoriteplaces.feature_favorites.presentation.edit_favorite.composables.EditFavoriteScreen
 import com.example.favoriteplaces.feature_favorites.presentation.favorites.composables.FavoritesScreen
 import com.example.favoriteplaces.feature_favorites.presentation.util.Screen
@@ -43,6 +44,10 @@ class MainActivity : ComponentActivity()  {
 
                         composable(route = Screen.AddNewFavoriteScreen.route){
                             AddNewFavorite(navController = navController, context = applicationContext)
+                        }
+
+                        composable(route = Screen.CityMapScreen.route ){
+                            CityMapScreen(navController = navController, context = applicationContext)
                         }
 
                         composable(route = Screen.EditFavoriteScreen.route + "?favoriteId={favoriteId}&favoriteColor={favoriteColor}",

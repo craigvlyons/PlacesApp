@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.favoriteplaces.feature_favorites.domain.model.CityWithColors
 import com.example.favoriteplaces.feature_favorites.domain.model.ColorVariation
 import com.example.favoriteplaces.feature_favorites.domain.model.Favorite
+import com.example.favoriteplaces.feature_favorites.domain.model.MapItems
+import com.example.favoriteplaces.feature_favorites.domain.use_case.cacheusecase.MapItemsCacheUseCases
 import com.example.favoriteplaces.feature_favorites.domain.use_case.localusecase.FavoriteUseCases
 import com.example.favoriteplaces.feature_favorites.presentation.edit_favorite.EditFavoriteViewModel
 import com.example.favoriteplaces.feature_favorites.presentation.util.FavoriteOrder
@@ -23,7 +25,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FavoritesViewModel @Inject constructor(
-    private val favoriteUseCases: FavoriteUseCases
+    private val favoriteUseCases: FavoriteUseCases,
+    private val mapItemsCacheUseCases: MapItemsCacheUseCases
 ) : ViewModel() {
     private val _state = mutableStateOf(FavoritesUiState())
     val state: State<FavoritesUiState> = _state
@@ -97,6 +100,19 @@ class FavoritesViewModel @Inject constructor(
                 )
                 getAllCitiesAndColors()
             }
+            is FavoritesEvent.CityMapSelect -> {
+                saveMapItemsToCash( event.city, event.colorVariation)
+            }
+        }
+    }
+
+    private fun saveMapItemsToCash(city: String, colorVariation: ColorVariation) {
+        val mapItems = MapItems(
+            city = city,
+            mapItems = colorVariation.toMapItems()
+        )
+        viewModelScope.launch {
+            mapItemsCacheUseCases.saveMapItems(mapItems)
         }
     }
 

@@ -1,6 +1,6 @@
 package com.example.favoriteplaces.feature_favorites.domain.model
 
-data class CityWithColors(
+data class MapItems(
     val city: String,
-    val colorVariations: List<ColorVariation>
+    val mapItems: List<MapItem>,
 )

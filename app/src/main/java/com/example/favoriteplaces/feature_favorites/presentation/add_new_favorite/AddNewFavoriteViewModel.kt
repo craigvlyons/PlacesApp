@@ -55,9 +55,11 @@ class AddNewFavoriteViewModel @Inject constructor(
     private val _uiState = mutableStateOf(AddNewFavoriteUiState())
     val uiState: State<AddNewFavoriteUiState> = _uiState
 
-    private val _favoriteTitle = mutableStateOf(AddFavoriteTextFieldState(
+    private val _favoriteTitle = mutableStateOf(
+        AddFavoriteTextFieldState(
             hint = "Search for place..."
-        ))
+        )
+    )
     val favoriteTitle: State<AddFavoriteTextFieldState> = _favoriteTitle
 
     private val _favoriteColor = mutableStateOf(Favorite.favoriteColors[0].toArgb())
@@ -109,7 +111,7 @@ class AddNewFavoriteViewModel @Inject constructor(
                     try {
                         _uiState.value.favorite?.let { favoriteUseCases.addFavorite(it) }
                         _eventFlow.emit(UiEvent.SaveFavorite)
-                    }catch (e:Exception){
+                    } catch (e: Exception) {
                         _eventFlow.emit(
                             UiEvent.ShowSnackbar(
                                 message = "Error saving: ${e.message}"
@@ -129,6 +131,7 @@ class AddNewFavoriteViewModel @Inject constructor(
 
                 Log.i("result", "prediction Id: ${event.predictionResult.placeId}")
             }
+
             is AddNewFavoriteEvent.RequestLocationPermission -> {
                 requestLocationPermission()
             }
@@ -136,7 +139,8 @@ class AddNewFavoriteViewModel @Inject constructor(
     }
 
     private fun searchPlaces(query: String) {
-        val location: String = LatLng( _currentLocation.value.latitude, _currentLocation.value.longitude).toString()
+        val location: String =
+            LatLng(_currentLocation.value.latitude, _currentLocation.value.longitude).toString()
         Log.i("location", "Location: ${location}") // location is always "0.0 , 0.0"
         job?.cancel()
         job = viewModelScope.launch {
@@ -152,7 +156,6 @@ class AddNewFavoriteViewModel @Inject constructor(
                     }
                 }
                 isLoading = false
-
             } catch (e: Exception) {
                 // _eventFlow.emit(UiEvent.ShowSnackbar("Error getting address"))
                 Log.i("resultTag", "Failed to get response: ${e.message}")
@@ -180,10 +183,8 @@ class AddNewFavoriteViewModel @Inject constructor(
     }
 
     private fun updateCurrentLocation(newLocation: LatLng) {
-        //_currentLocation.value = newLocation
-        _uiState.value = _uiState.value.copy(
-            isMapVisible = true
-        )
+
+
     }
 
     private fun updateSelectedId(newSelectedId: String) {
@@ -203,13 +204,12 @@ class AddNewFavoriteViewModel @Inject constructor(
             rating = 0,
             city = city,
             latitude = _currentLocation.value.latitude,
-            longitude = _currentLocation.value.latitude
+            longitude = _currentLocation.value.longitude
         )
         _uiState.value = _uiState.value.copy(
             favorite = favorite
         )
-        Log.i("resultFavorite","favorite: ${_uiState.value.favorite}")
-
+        Log.i("resultFavorite", "favorite: ${_uiState.value.favorite}")
     }
 
 
@@ -256,6 +256,7 @@ class AddNewFavoriteViewModel @Inject constructor(
     fun requestLocationPermission() {
         locationState = LocationPermissionState.RequestPermission
     }
+
     fun onLocationPermissionResult(granted: Boolean) {
         if (granted) {
             // Permission granted, start location updates
@@ -275,12 +276,12 @@ class AddNewFavoriteViewModel @Inject constructor(
         locationState = LocationPermissionState.LocationLoading
         fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
             .addOnSuccessListener { location ->
-                    if (location != null) {
-                        Log.i("LocationTag", "Location: ${location.latitude}, ${location.longitude}")
-                        _currentLocation.value = LatLng(location.latitude, location.longitude)
-                    } else {
-                        Log.e("LocationTag", "Location is null")
-                    }
+                if (location != null) {
+                    Log.i("LocationTag", "Location: ${location.latitude}, ${location.longitude}")
+                    _currentLocation.value = LatLng(location.latitude, location.longitude)
+                } else {
+                    Log.e("LocationTag", "Location is null")
+                }
                 locationState = LocationPermissionState.LocationAvailable(
                     LatLng(location.latitude, location.longitude)
                 )

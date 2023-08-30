@@ -40,7 +40,7 @@ fun FavoriteListView(
     modifier: Modifier = Modifier,
     cornerRadius: Dp = 10.dp,
     onEditSelect: (favorite: Favorite) -> Unit,
-    onMapSelect: () -> Unit
+    onMapSelect: (city: String, favoriteList: ColorVariation) -> Unit
 ) {
     Box(
         modifier = modifier
@@ -108,7 +108,7 @@ fun FavoriteListView(
                 .align(Alignment.TopEnd)
                 .padding(end = 16.dp),
             onClick = {
-                onMapSelect()
+                onMapSelect(city, favoritesList)
             }
         ) {
             Icon(

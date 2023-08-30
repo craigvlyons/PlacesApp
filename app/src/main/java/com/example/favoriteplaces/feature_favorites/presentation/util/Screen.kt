@@ -5,4 +5,5 @@ sealed class Screen(val route:String) {
     object FavoritesScreen: Screen("favorites_screen")
     object AddNewFavoriteScreen: Screen("Add_New_favorite_screen")
     object EditFavoriteScreen: Screen("edit_Favorite_Screen")
+    object CityMapScreen: Screen("city_map_Screen")
 }

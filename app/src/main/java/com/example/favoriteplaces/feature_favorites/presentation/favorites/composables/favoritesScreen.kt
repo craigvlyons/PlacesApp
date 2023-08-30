@@ -63,14 +63,6 @@ fun FavoritesScreen(
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
 
-    //val colorado = LatLng(38.8434428,-104.8274974)
-    //val defaultCameraPosition = CameraPosition.fromLatLngZoom(colorado, 11f)
-//    val locationPermissionState = rememberMultiplePermissionsState(
-//        listOf(
-//            Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION
-//        )
-//    )
-
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
@@ -173,7 +165,13 @@ fun FavoritesScreen(
                                         onEditSelect = { favorite ->
                                             navController.navigate(Screen.EditFavoriteScreen.route + "?favoriteId=${favorite.id}&favoriteColor=${favorite.color}")
                                         },
-                                        onMapSelect = {}
+                                        onMapSelect = { city, favoriteList ->
+                                            viewModel.onEvent(FavoritesEvent.CityMapSelect(city, favoriteList))
+
+                                            navController.navigate(Screen.CityMapScreen.route)
+                                            //Log.i("maplist", "city: ${city}")
+                                            //Log.i("maplist", "favorite list: ${favoriteList}")
+                                        }
                                     )
                                     Spacer(modifier = Modifier.height(16.dp))
                                 }

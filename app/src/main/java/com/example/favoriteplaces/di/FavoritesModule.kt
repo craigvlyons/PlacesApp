@@ -4,7 +4,12 @@ import android.app.Application
 import androidx.room.Room
 import com.example.favoriteplaces.feature_favorites.data.data_source.db.FavoriteDatabase
 import com.example.favoriteplaces.feature_favorites.data.repository.FavoriteRepositoryImpl
+import com.example.favoriteplaces.feature_favorites.data.repository.MapItemsRepositoryImpl
 import com.example.favoriteplaces.feature_favorites.domain.repository.FavoriteRepository
+import com.example.favoriteplaces.feature_favorites.domain.repository.MapItemsRepository
+import com.example.favoriteplaces.feature_favorites.domain.use_case.cacheusecase.GetMapItemsUseCase
+import com.example.favoriteplaces.feature_favorites.domain.use_case.cacheusecase.MapItemsCacheUseCases
+import com.example.favoriteplaces.feature_favorites.domain.use_case.cacheusecase.SaveMapItemsUseCase
 import com.example.favoriteplaces.feature_favorites.domain.use_case.localusecase.AddFavoriteUseCase
 import com.example.favoriteplaces.feature_favorites.domain.use_case.localusecase.DeleteFavoriteUseCase
 import com.example.favoriteplaces.feature_favorites.domain.use_case.localusecase.FavoriteUseCases
@@ -48,6 +53,21 @@ object FavoritesModule {
             addFavorite = AddFavoriteUseCase(repository),
             getAllCities = GetAllCitiesUseCase(repository),
             getFavoritesByCityAndColor = GetFavoritesByCityAndColorUseCase(repository)
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideMapItemsRepository() : MapItemsRepository {
+        return MapItemsRepositoryImpl()
+    }
+
+    @Provides
+    @Singleton
+    fun provideMapItemsUseCase( repository: MapItemsRepository) : MapItemsCacheUseCases {
+        return MapItemsCacheUseCases(
+            getMapItems = GetMapItemsUseCase(repository),
+            saveMapItems = SaveMapItemsUseCase(repository)
         )
     }
 

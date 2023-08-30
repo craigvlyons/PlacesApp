@@ -9,12 +9,13 @@ import com.example.favoriteplaces.ui.theme.LightGreen
 import com.example.favoriteplaces.ui.theme.RedOrange
 import com.example.favoriteplaces.ui.theme.RedPink
 import com.example.favoriteplaces.ui.theme.Violet
+import com.google.gson.Gson
 
 @Entity
 data class Favorite(
     @PrimaryKey
-    var id : Int? = null,
-    val placeId : String? = "",
+    var id: Int? = null,
+    val placeId: String? = "",
     val title: String,
     val address: String,
     val content: String?,
@@ -24,10 +25,15 @@ data class Favorite(
     val city: String,
     val latitude: Double,
     val longitude: Double
-){
+) {
     companion object {
         val favoriteColors = listOf(RedOrange, LightGreen, Violet, BabyBlue, RedPink)
     }
+
 }
 
-class InvalidNoteException(message:String): Exception(message)
+fun <T> String.fromJson(clazz: Class<T>): T {
+    return Gson().fromJson(this, clazz)
+}
+
+class InvalidNoteException(message: String) : Exception(message)

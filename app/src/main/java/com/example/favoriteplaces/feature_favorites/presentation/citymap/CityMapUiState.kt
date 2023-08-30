@@ -1,7 +1,8 @@
 package com.example.favoriteplaces.feature_favorites.presentation.citymap
 
-import com.example.favoriteplaces.feature_favorites.domain.model.Favorite
+import com.example.favoriteplaces.feature_favorites.domain.model.ColorVariation
 
 data class CityMapUiState(
-    val mapItems : List<Favorite>,
+    val city: String,
+    val mapItems : ColorVariation,
 )

@@ -70,6 +70,8 @@ dependencies {
     implementation ("com.squareup.retrofit2:converter-gson:$retrofitVersion")
     implementation ("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.6")
 
+    implementation ("com.google.code.gson:gson:2.9.0")
+
     implementation("androidx.core:core-ktx:1.10.1")
     implementation ("androidx.appcompat:appcompat:1.6.1")
     implementation ("com.google.android.material:material:1.9.0")
@@ -132,10 +134,3 @@ kapt {
 secrets{
     defaultPropertiesFileName = "local.properties"
 }
-//
-//tasks.register("generateSecrets") {
-//    doLast {
-//        Secrets.init("../app/local.properties")
-//        println("MAPS_API_KEY: ${Secrets.mapsApiKey}")
-//    }
-//}
