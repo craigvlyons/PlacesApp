@@ -96,7 +96,8 @@ class FavoritesViewModel @Inject constructor(
             is FavoritesEvent.ToggleListOrCardView -> {
                 _state.value = _state.value.copy(
                     isListView = !_state.value.isListView,
-                    isCardView = !_state.value.isCardView
+                    isCardView = !_state.value.isCardView,
+                    isOrderSelectionVisible = false
                 )
                 getAllCitiesAndColors()
             }

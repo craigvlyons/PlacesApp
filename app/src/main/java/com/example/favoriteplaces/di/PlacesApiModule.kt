@@ -1,7 +1,8 @@
-package com.example.favoriteplaces.feature_favorites.di
+package com.example.favoriteplaces.di
 
 import android.content.Context
 import android.location.Geocoder
+import com.example.favoriteplaces.BuildConfig
 import com.example.favoriteplaces.feature_favorites.data.data_source.api.GooglePlacesApi
 import com.example.favoriteplaces.feature_favorites.data.repository.PlacesRepositoryImpl
 import com.example.favoriteplaces.feature_favorites.domain.use_case.apiusecase.GetPlaceDetailsUseCase
@@ -18,9 +19,10 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
+
 @Module
 @InstallIn(SingletonComponent::class)
-object PlacesModule {
+object PlacesApiModule {
     @Singleton
     @Provides
     fun provideRetrofit(): Retrofit {
@@ -29,17 +31,19 @@ object PlacesModule {
             .baseUrl(GooglePlacesApi.BASE_URL)
             .build()
     }
+
     @Singleton
     @Provides
-    fun providesGooglePlacesApi(retrofit: Retrofit): GooglePlacesApi{
+    fun providesGooglePlacesApi(retrofit: Retrofit): GooglePlacesApi {
         return retrofit.create(GooglePlacesApi::class.java)
     }
 
     @Singleton
     @Provides
-    fun providesPlacesRepositoryImpl(placesApi: GooglePlacesApi): PlacesRepositoryImpl{
+    fun providesPlacesRepositoryImpl(placesApi: GooglePlacesApi): PlacesRepositoryImpl {
         return PlacesRepositoryImpl(
-            placesApi, apiKey = "AIzaSyCIqp5O_6r5xb9tphh1vEzHtAo41y5yJ_I"
+            placesApi,
+            apiKey = BuildConfig.MAPS_API_KEY
         )
     }
 
@@ -58,7 +62,7 @@ object PlacesModule {
     @Provides
     @Singleton
     fun providePlacesClient(@ApplicationContext context: Context): PlacesClient {
-        Places.initialize(context, "AIzaSyCIqp5O_6r5xb9tphh1vEzHtAo41y5yJ_I")
+        Places.initialize(context, BuildConfig.MAPS_API_KEY)
         return Places.createClient(context)
     }
 

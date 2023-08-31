@@ -122,7 +122,6 @@ fun FavoritesScreen(
                     androidx.compose.material.Icon(
                         imageVector = Icons.Default.Sort,
                         contentDescription = "Sort",
-
                         )
                 }
             }
@@ -143,7 +142,6 @@ fun FavoritesScreen(
                         viewModel.onEvent(FavoritesEvent.Order(it))
                     },
                     onViewChange = {
-
                         viewModel.onEvent(FavoritesEvent.ToggleListOrCardView)
                     }
                 )
@@ -153,9 +151,8 @@ fun FavoritesScreen(
             Box(
                 modifier = Modifier.fillMaxSize()
             ) {
-                if (state.isListView) { // show state.cityColorList as FavoriteListView
-                    LazyColumn() {
-
+                if (state.isListView) {
+                    LazyColumn {
                         items(state.cityColorList) { cities ->
                             cities.colorVariations.forEach { colorVariation ->
                                 if (!colorVariation.favorites.isNullOrEmpty()) {
@@ -167,10 +164,7 @@ fun FavoritesScreen(
                                         },
                                         onMapSelect = { city, favoriteList ->
                                             viewModel.onEvent(FavoritesEvent.CityMapSelect(city, favoriteList))
-
                                             navController.navigate(Screen.CityMapScreen.route)
-                                            //Log.i("maplist", "city: ${city}")
-                                            //Log.i("maplist", "favorite list: ${favoriteList}")
                                         }
                                     )
                                     Spacer(modifier = Modifier.height(16.dp))

@@ -30,6 +30,15 @@ data class Favorite(
         val favoriteColors = listOf(RedOrange, LightGreen, Violet, BabyBlue, RedPink)
     }
 
+    fun toMapItems(): MapItems {
+        return MapItems(
+            city = city,
+            mapItems = listOf(
+                MapItem(latitude, longitude, title)
+            )
+        )
+    }
+
 }
 
 fun <T> String.fromJson(clazz: Class<T>): T {

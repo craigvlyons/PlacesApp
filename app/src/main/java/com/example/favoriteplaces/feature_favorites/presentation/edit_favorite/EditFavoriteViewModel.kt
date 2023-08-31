@@ -8,6 +8,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.favoriteplaces.feature_favorites.domain.model.Favorite
+import com.example.favoriteplaces.feature_favorites.domain.use_case.cacheusecase.MapItemsCacheUseCases
 import com.example.favoriteplaces.feature_favorites.domain.use_case.localusecase.FavoriteUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -18,6 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class EditFavoriteViewModel @Inject constructor(
     private val favoriteUseCases: FavoriteUseCases,
+    private val mapItemsCacheUseCase: MapItemsCacheUseCases,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val favoriteState = mutableStateOf(EditFavoriteUiState(favorite = null))
@@ -150,14 +152,24 @@ class EditFavoriteViewModel @Inject constructor(
             is EditFavoriteEvent.SaveFavorite -> {
                 saveFavorite()
             }
+            is EditFavoriteEvent.MapSelect -> {
+                saveFavoriteToMapItem()
+            }
+
+            else -> {}
         }
     }
 
-    private fun saveFavorite() {
+    private fun saveFavoriteToMapItem() {
+        val newFavorite = getFavorite()
+        mapItemsCacheUseCase.saveMapItems(newFavorite.toMapItems())
+    }
+
+    private fun getFavorite(): Favorite {
         if (_favoriteCity.value.isBlank()){
             updateCity()
         }
-        val saveFavorite = Favorite(
+        return  Favorite(
             id = favoriteState.value.favorite?.id,
             placeId = favoriteState.value.favorite?.placeId,
             title = _favoriteTitle.value.text,
@@ -170,6 +182,10 @@ class EditFavoriteViewModel @Inject constructor(
             latitude = favoriteState.value.favorite!!.latitude,
             longitude = favoriteState.value.favorite!!.longitude
         )
+    }
+
+    private fun saveFavorite() {
+        val saveFavorite = getFavorite()
         viewModelScope.launch {
             try {
                 favoriteUseCases.addFavorite(saveFavorite)

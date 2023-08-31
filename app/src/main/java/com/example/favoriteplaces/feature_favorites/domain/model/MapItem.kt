@@ -8,6 +8,9 @@ data class MapItem(
     val itemTitle: String,
     val itemSnippet: String,
 ) {
+    constructor(latitude: Double, longitude: Double, title: String) :
+            this(LatLng(latitude, longitude), title, title)
+
     fun getPosition(): LatLng =
         itemPosition
 
