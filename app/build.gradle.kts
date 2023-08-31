@@ -1,4 +1,3 @@
-// import  com.example.favoriteplaces.secrets.Secrets
 
 plugins {
     id("com.android.application")
@@ -35,12 +34,18 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
+    kotlin{
+        jvmToolchain (11)
+        
+    }
+
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "11"
     }
+
     buildFeatures {
         compose = true
         buildConfig = true
@@ -92,7 +97,6 @@ dependencies {
     // google maps, places
     implementation ("com.google.maps.android:maps-compose:2.13.0")
     implementation ("com.google.android.gms:play-services-maps:18.1.0")
-    //implementation ("com.google.android.gms:play-services-location:21.0.1")
     implementation ("com.google.maps.android:maps-ktx:3.4.0")
     implementation ("com.google.android.libraries.places:places:3.2.0")
 

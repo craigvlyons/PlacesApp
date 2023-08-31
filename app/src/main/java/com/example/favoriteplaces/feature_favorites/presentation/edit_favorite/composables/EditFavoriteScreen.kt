@@ -102,7 +102,6 @@ fun EditFavoriteScreen(
         floatingActionButtonPosition = FabPosition.Center
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -177,7 +176,7 @@ fun EditFavoriteScreen(
                     color = MaterialTheme.colors.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    )
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 

@@ -37,13 +37,11 @@ class EditFavoriteViewModel @Inject constructor(
     val favoriteColor: State<Int> = _favoriteColor
 
     private val _favoriteId = mutableStateOf(0)
-    val favoriteId: State<Int> = _favoriteId
 
     private val _favoriteRating = mutableStateOf(0)
     val favoriteRating: State<Int> = _favoriteRating
 
     private val _favoriteCity = mutableStateOf("")
-    val favoriteCity: State<String> = _favoriteCity
 
     private var _address = mutableStateOf(emptyList<String>())
     val address: State<List<String>> = _address
@@ -92,7 +90,7 @@ class EditFavoriteViewModel @Inject constructor(
                         }
 
                     } catch (e: Exception) {
-                        Log.i("resultFavorite", "failure retrieving favorite by id: ${e.message}")
+                        Log.e("resultFavorite", "failure retrieving favorite by id: ${e.message}")
                         _eventFlow.emit(
                             UiEvent.ShowSnackbar(
                                 message = e.message ?: "Couldn't get favorite by Id."
@@ -106,11 +104,9 @@ class EditFavoriteViewModel @Inject constructor(
     }
 
     private fun updateCity() {
-
         val cityFromAddress = _address.value[1].trim()
         _favoriteCity.value = cityFromAddress
-        Log.i("list","city: $cityFromAddress")
-
+        //Log.i("list","city: $cityFromAddress")
     }
 
     fun onEvent(event: EditFavoriteEvent) {

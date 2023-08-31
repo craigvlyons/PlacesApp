@@ -30,16 +30,11 @@ class FavoritesViewModel @Inject constructor(
 ) : ViewModel() {
     private val _state = mutableStateOf(FavoritesUiState())
     val state: State<FavoritesUiState> = _state
-
-    private var _cities: State<List<String>> = mutableStateOf(emptyList())
-    var cities: State<List<String>> = _cities
-
     private var recentlyDeletedFavorite: Favorite? = null
 
     // one time events, for snackBar.
     private val _eventFlow = MutableSharedFlow<EditFavoriteViewModel.UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
-
 
     init {
         getAllCitiesAndColors()
@@ -120,7 +115,7 @@ class FavoritesViewModel @Inject constructor(
 
     private fun getFavorites(favoriteOrder: FavoriteOrder) {
         viewModelScope.launch {
-            favoriteUseCases.getFavorites(favoriteOrder).collect() { favorites ->
+            favoriteUseCases.getFavorites(favoriteOrder).collect { favorites ->
                 _state.value = _state.value.copy(
                     favorites = favorites,
                     favoriteOrder = favoriteOrder

@@ -7,7 +7,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -50,7 +49,6 @@ class AddNewFavoriteViewModel @Inject constructor(
     val currentLocation: State<LatLng> = _currentLocation
 
     private val _formattedAddress = mutableStateOf("")
-    val formattedAddress: State<String> = _formattedAddress
 
     private val _uiState = mutableStateOf(AddNewFavoriteUiState())
     val uiState: State<AddNewFavoriteUiState> = _uiState
@@ -61,10 +59,6 @@ class AddNewFavoriteViewModel @Inject constructor(
         )
     )
     val favoriteTitle: State<AddFavoriteTextFieldState> = _favoriteTitle
-
-    private val _favoriteColor = mutableStateOf(Favorite.favoriteColors[0].toArgb())
-    val favoriteColor: State<Int> = _favoriteColor
-
     private var job: Job? = null
     private var locationJob: Job? = null
 
@@ -101,8 +95,7 @@ class AddNewFavoriteViewModel @Inject constructor(
             }
 
             is AddNewFavoriteEvent.ToggleMapSelection -> {
-                // this should call an api function to get location data, passing the selected Prediction Id.
-                TODO()
+                updateIsMapVisible()
             }
 
             is AddNewFavoriteEvent.SaveFavorite -> {
@@ -128,8 +121,7 @@ class AddNewFavoriteViewModel @Inject constructor(
             is AddNewFavoriteEvent.SelectedResult -> {
                 // this is a selected prediction.
                 updateSelectedId(event.predictionResult.placeId)
-
-                Log.i("result", "prediction Id: ${event.predictionResult.placeId}")
+                //Log.i("result", "prediction Id: ${event.predictionResult.placeId}")
             }
 
             is AddNewFavoriteEvent.RequestLocationPermission -> {
@@ -141,7 +133,6 @@ class AddNewFavoriteViewModel @Inject constructor(
     private fun searchPlaces(query: String) {
         val location: String =
             LatLng(_currentLocation.value.latitude, _currentLocation.value.longitude).toString()
-        Log.i("location", "Location: ${location}") // location is always "0.0 , 0.0"
         job?.cancel()
         job = viewModelScope.launch {
             try {
@@ -150,6 +141,7 @@ class AddNewFavoriteViewModel @Inject constructor(
                         is Resource.Success -> {
                             updateUiStatePredictions(response.data ?: emptyList())
                         }
+
                         else -> {
                             Log.i("tag", "when else block, error in getPredictionsUseCase")
                         }
@@ -157,8 +149,8 @@ class AddNewFavoriteViewModel @Inject constructor(
                 }
                 isLoading = false
             } catch (e: Exception) {
-                // _eventFlow.emit(UiEvent.ShowSnackbar("Error getting address"))
-                Log.i("resultTag", "Failed to get response: ${e.message}")
+                //_eventFlow.emit(UiEvent.ShowSnackbar("Error getting address"))
+                Log.e("resultTag", "Failed to get response: ${e.message}")
             }
         }
     }
@@ -176,16 +168,8 @@ class AddNewFavoriteViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(
             isMapVisible = !_uiState.value.isMapVisible
         )
-        Log.i(
-            "resultDetails",
-            "current location after isMapVisible function: ${_currentLocation.value}"
-        )
     }
 
-    private fun updateCurrentLocation(newLocation: LatLng) {
-
-
-    }
 
     private fun updateSelectedId(newSelectedId: String) {
         _selectedId.value = newSelectedId
@@ -209,7 +193,7 @@ class AddNewFavoriteViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(
             favorite = favorite
         )
-        Log.i("resultFavorite", "favorite: ${_uiState.value.favorite}")
+        //Log.i("resultFavorite", "favorite: ${_uiState.value.favorite}")
     }
 
 
@@ -218,14 +202,11 @@ class AddNewFavoriteViewModel @Inject constructor(
         locationJob = viewModelScope.launch {
             try {
                 getPlaceDetailsUseCase(id).collect() { details ->
-                    Log.i("resultDetails", "Details from useCase collect: ${details} ")
+                    //Log.i("resultDetails", "Details from useCase collect: ${details} ")
                     when (details) {
                         is Resource.Success -> {
                             val location = details.data.geometry?.location?.let {
-                                LatLng(
-                                    it.lat,
-                                    it.lng
-                                )
+                                LatLng(it.lat, it.lng)
                             }
                             val address = details.data.formattedAddress
                             if (address != null) {
@@ -245,10 +226,9 @@ class AddNewFavoriteViewModel @Inject constructor(
                 isLoading = false
 
             } catch (e: Exception) {
-                // _eventFlow.emit(UiEvent.ShowSnackbar("Error getting Details."))
-                Log.i("resultDetails", "Failed to get details response: ${e.message}")
+                _eventFlow.emit(UiEvent.ShowSnackbar("Error getting Details: ${e.message}."))
+                Log.e("resultDetails", "Failed to get details response: ${e.message}")
             }
-            Log.i("resultDetails", "current location after function: ${_currentLocation.value}")
             updateIsMapVisible()
         }
     }
@@ -277,7 +257,6 @@ class AddNewFavoriteViewModel @Inject constructor(
         fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
             .addOnSuccessListener { location ->
                 if (location != null) {
-                    Log.i("LocationTag", "Location: ${location.latitude}, ${location.longitude}")
                     _currentLocation.value = LatLng(location.latitude, location.longitude)
                 } else {
                     Log.e("LocationTag", "Location is null")
@@ -290,9 +269,7 @@ class AddNewFavoriteViewModel @Inject constructor(
                 Log.e("LocationTag", "Failed to get location: ${e.message}")
                 locationState = LocationPermissionState.Error
             }
-
     }
-
 
     fun getAddress(latLng: LatLng) {
         viewModelScope.launch {
