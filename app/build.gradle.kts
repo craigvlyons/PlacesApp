@@ -31,6 +31,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -95,10 +96,11 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     // google maps, places
-    implementation ("com.google.maps.android:maps-compose:2.13.0")
+    //implementation ("com.google.maps.android:maps-compose:2.13.0")
     implementation ("com.google.android.gms:play-services-maps:18.1.0")
     implementation ("com.google.maps.android:maps-ktx:3.4.0")
     implementation ("com.google.android.libraries.places:places:3.2.0")
+
 
     // Compose dependencies
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0-alpha01")

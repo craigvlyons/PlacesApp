@@ -12,10 +12,11 @@ interface GooglePlacesApi {
         @Query("input") input: String,
         @Query("key") key: String ,
         @Query("types") types: String = "establishment",
-        @Query("components") components: String = "country:us",
         @Query("location") location: String,
         @Query("radius") radius: String = "75",
     ): PlacesResponseModel
+
+    //@Query("components") components: String = "country:us",
 
     @GET("maps/api/place/details/json")
     suspend fun getPlaceDetails(

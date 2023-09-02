@@ -34,10 +34,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.favoriteplaces.feature_favorites.data.models.predicition.Prediction
+import com.example.favoriteplaces.features.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.maps.android.compose.CameraPositionState
-import com.google.maps.android.compose.GoogleMap
+//import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
@@ -89,7 +90,6 @@ fun PredictionCard(
                 lineTo(0f, size.height)
                 close()
             }
-
             clipPath(clipPath) {
                 drawRoundRect(
                     color = Color.Transparent,
@@ -112,7 +112,7 @@ fun PredictionCard(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Divider(modifier = Modifier , 1.dp  ,Color.DarkGray)
+            Divider(modifier = Modifier , 1.dp  ,Color.Cyan)
             Spacer(modifier = Modifier.height(8.dp))
             // Address
             Text(
@@ -147,8 +147,6 @@ fun PredictionCard(
                         .height(200.dp)
                 ) {
 
-                    // do just a map not map in column
-
                     GoogleMap(
                         modifier = modifier,
                         cameraPositionState = cameraPositionState,
@@ -156,12 +154,6 @@ fun PredictionCard(
                         uiSettings = uiSettings,
                         onMapLoaded = onMapLoaded
                     ) {
-                        //updateCameraPosition(markerLocation)
-                        if (isMapLoaded){
-                            //locationState.position = markerLocation // .animatePosition(markerLocation)
-                            //locationState.marker
-                        }
-
                         // Drawing on the map is accomplished with a child-based API
                         val markerClick: (Marker) -> Boolean = {
                             Log.d("mapTag", "${it.title} was clicked")
@@ -179,9 +171,6 @@ fun PredictionCard(
                             androidx.compose.material.Text(it.title ?: "Title", color = Color.Red)
                         }
                     }
-
-
-
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
@@ -193,7 +182,7 @@ fun PredictionCard(
                             .padding(0.dp)
                             .border(
                                 0.5.dp,
-                                Color.DarkGray,
+                                Color.Cyan,
                                 shape = RoundedCornerShape(size = 20.dp)
                             ),
                         onClick = { saveLocation() }) {
