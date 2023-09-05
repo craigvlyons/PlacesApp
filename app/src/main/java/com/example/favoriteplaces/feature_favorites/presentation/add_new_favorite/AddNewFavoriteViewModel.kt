@@ -115,7 +115,17 @@ class AddNewFavoriteViewModel @Inject constructor(
             }
 
             is AddNewFavoriteEvent.Search -> {
-                searchPlaces(_favoriteTitle.value.text)
+                if (_favoriteTitle.value.text.isNotBlank()) {
+                    searchPlaces(_favoriteTitle.value.text)
+                } else {
+                    viewModelScope.launch {
+                        _eventFlow.emit(
+                            UiEvent.ShowSnackbar(
+                                message = "Search can not be blank."
+                            )
+                        )
+                    }
+                }
             }
 
             is AddNewFavoriteEvent.SelectedResult -> {

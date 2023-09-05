@@ -22,6 +22,10 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -46,6 +50,9 @@ fun FavoriteItem(
     onDeleteClick: () -> Unit,
     onLovedClick: (Boolean) -> Unit
 ) {
+    var isLoved by remember {
+        mutableStateOf(favorite.isFavorite)
+    }
     Box(
         modifier = modifier
             .shadow(6.dp, shape = RoundedCornerShape(cornerRadius))
@@ -89,7 +96,7 @@ fun FavoriteItem(
                 RatingStars(rating = favorite.rating ?: 0)
                 LovedButton(
                     modifier = Modifier.padding(end = 6.dp),
-                    isFavorite = favorite.isFavorite,
+                    isFavorite = isLoved,
                     onClick = { onLovedClick(it) }
                 )
             }

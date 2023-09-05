@@ -23,11 +23,6 @@ class MainActivity : ComponentActivity()  {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Initialize the Places SDK with your API key
-
-//        val apiKey = "AIzaSyCIqp5O_6r5xb9tphh1vEzHtAo41y5yJ_I"
-//        Places.initialize(applicationContext, apiKey)
-
         setContent {
             FavoritePlacesTheme {
                 Surface(
@@ -69,11 +64,8 @@ class MainActivity : ComponentActivity()  {
                             val color = it.arguments?.getInt("favoriteColor") ?: -1
                             EditFavoriteScreen(navController = navController, favoriteColor = color)
                         }
-
                     }
-
                 }
-
             }
         }
     }

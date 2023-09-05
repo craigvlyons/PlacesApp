@@ -35,12 +35,14 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.favoriteplaces.feature_favorites.presentation.edit_favorite.EditFavoriteViewModel
 import com.example.favoriteplaces.feature_favorites.presentation.favorites.FavoritesEvent
@@ -59,9 +61,10 @@ fun FavoritesScreen(
     context: Context,
     viewModel: FavoritesViewModel = hiltViewModel()
 ) {
-    val state = viewModel.state.value
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
+
 
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
@@ -74,6 +77,10 @@ fun FavoritesScreen(
                 else -> {}
             }
         }
+    }
+
+    LaunchedEffect(key1 = state) {
+        viewModel.updateCitiesAndColors()
     }
 
     // Initialize location-related components
@@ -153,7 +160,12 @@ fun FavoritesScreen(
             ) {
                 if (state.isListView) {
                     LazyColumn {
-                        items(state.cityColorList) { cities ->
+                        items(
+                            items = state.cityColorList,
+                            key = { cityColorItem ->
+                                cityColorItem.city
+                            }
+                            ) { cities ->
                             cities.colorVariations.forEach { colorVariation ->
                                 if (!colorVariation.favorites.isNullOrEmpty()) {
                                     FavoriteListView(
@@ -177,7 +189,12 @@ fun FavoritesScreen(
                 // show state. favorites in FavoriteItem
                 if (state.isCardView) {
                     LazyColumn() {
-                        items(state.favorites) { favorite ->
+                        items(
+                            items = state.favorites,
+                            key = { favorite ->
+                                favorite.id!!
+                            }
+                            ) { favorite ->
                             FavoriteItem(
                                 favorite = favorite,
                                 modifier = Modifier

@@ -1,7 +1,5 @@
 package com.example.favoriteplaces.feature_favorites.presentation.favorites
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.favoriteplaces.feature_favorites.domain.model.CityWithColors
@@ -13,9 +11,12 @@ import com.example.favoriteplaces.feature_favorites.domain.use_case.localusecase
 import com.example.favoriteplaces.feature_favorites.presentation.edit_favorite.EditFavoriteViewModel
 import com.example.favoriteplaces.feature_favorites.presentation.util.FavoriteOrder
 import com.example.favoriteplaces.feature_favorites.presentation.util.OrderType
+import com.example.favoriteplaces.feature_favorites.presentation.util.PreferencesHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
@@ -26,10 +27,12 @@ import javax.inject.Inject
 @HiltViewModel
 class FavoritesViewModel @Inject constructor(
     private val favoriteUseCases: FavoriteUseCases,
-    private val mapItemsCacheUseCases: MapItemsCacheUseCases
+    private val mapItemsCacheUseCases: MapItemsCacheUseCases,
+    private val preferencesHelper: PreferencesHelper
 ) : ViewModel() {
-    private val _state = mutableStateOf(FavoritesUiState())
-    val state: State<FavoritesUiState> = _state
+    private val _state = MutableStateFlow(FavoritesUiState())
+    val state: StateFlow<FavoritesUiState> = _state
+
     private var recentlyDeletedFavorite: Favorite? = null
 
     // one time events, for snackBar.
@@ -37,6 +40,14 @@ class FavoritesViewModel @Inject constructor(
     val eventFlow = _eventFlow.asSharedFlow()
 
     init {
+        //val savedFavoriteOrder = preferencesHelper.getFavoriteOrder()
+        val savedIsListView = preferencesHelper.getListViewMode()
+
+        _state.value = _state.value.copy(
+            isListView = savedIsListView,
+            isCardView = !savedIsListView,
+        )
+
         getAllCitiesAndColors()
         getFavorites(FavoriteOrder.City(OrderType.Descending))
     }
@@ -49,7 +60,9 @@ class FavoritesViewModel @Inject constructor(
                 ) {
                     return
                 }
+                _state.value = _state.value.copy(favoriteOrder = event.favoriteOrder)
                 getFavorites(event.favoriteOrder)
+                getAllCitiesAndColors()
             }
 
             is FavoritesEvent.DeleteFavorite -> {
@@ -94,10 +107,11 @@ class FavoritesViewModel @Inject constructor(
                     isCardView = !_state.value.isCardView,
                     isOrderSelectionVisible = false
                 )
-                getAllCitiesAndColors()
+                updateListViewMode(_state.value.isListView)
             }
+
             is FavoritesEvent.CityMapSelect -> {
-                saveMapItemsToCash( event.city, event.colorVariation)
+                saveMapItemsToCash(event.city, event.colorVariation)
             }
         }
     }
@@ -112,6 +126,9 @@ class FavoritesViewModel @Inject constructor(
         }
     }
 
+    fun updateCitiesAndColors() {
+        getAllCitiesAndColors()
+    }
 
     private fun getFavorites(favoriteOrder: FavoriteOrder) {
         viewModelScope.launch {
@@ -128,7 +145,7 @@ class FavoritesViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val citiesList =
-                    favoriteUseCases.getAllCities()?.first() // Collect the cities list once
+                    favoriteUseCases.getAllCities(_state.value.favoriteOrder)?.first() // Collect the cities list once
                 val combinedList = citiesList?.map { city ->
                     val colorVariationsDeferred = async {
                         val colorList =
@@ -153,6 +170,12 @@ class FavoritesViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    // Update the list view mode (radio button) when it changes
+    private fun updateListViewMode(isListView: Boolean) {
+        preferencesHelper.saveListViewMode(isListView)
+        getAllCitiesAndColors()
     }
 
     sealed class UiEvent {
