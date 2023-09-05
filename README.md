@@ -3,7 +3,19 @@ Android app uses Google places API and saves places as favorites.
 
 ![image](images/appIcon.png)
 
-- **To Build and run the app**
+### Author: Craig Lyons
+For more information about the author, visit [Author's Linkedin](https://www.linkedin.com/in/craig-lyons-bughunter).
+
+### All Rights Reserved
+
+This project and its contents are fully protected by copyright law. All rights are reserved. No part of this project may be reproduced, distributed, or transmitted in any form or by any means, without the prior written permission of the project owner.
+
+If you are interested in distributing this project, please contact the project owner at craigvlyons@gmail.com for permission. 
+
+### Copyright
+© 2023 Craig Lyons
+
+- **To Build and run the app for your own peronal device.**
     - clone repo to your computer.
     - you will need to install Android studio IDE to compile app. 
     - *Create Google API key*, go here: [Google Api Key](https://developers.google.com/maps/documentation/embed/get-api-key)
