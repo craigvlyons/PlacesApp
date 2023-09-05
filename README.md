@@ -1,6 +1,12 @@
 # PlacesApp
 Android app uses Google places API and saves places as favorites. 
 
+- **To Build and run the app**
+    - clone repo to your computer.
+    - *Create Google API key*, go here: [Link Text](https://developers.google.com/maps/documentation/embed/get-api-key)
+    - add your API key to local.properties file as MAPS_API_KEY="your_API_key"
+    - Build project. 
+
 ![image](images/places_Screens1.png)
 ### All your favorite places in one easy to use app. 
 no more text files of lists. instantly search and find google recommendations. easily access your favorite places and navigate right to them.  
