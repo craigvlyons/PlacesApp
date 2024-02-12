@@ -110,10 +110,11 @@ fun FavoritesScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .padding(horizontal = 10.dp)
+                ,
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -140,7 +141,7 @@ fun FavoritesScreen(
                 OrderSection(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp)
+                        .padding(vertical = 8.dp, horizontal = 0.dp)
                         .wrapContentWidth(),
                     favoriteOrder = state.favoriteOrder,
                     listView = state.isListView,
@@ -156,7 +157,9 @@ fun FavoritesScreen(
 
             Spacer(modifier = Modifier.height(6.dp))
             Box(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 12.dp)
             ) {
                 if (state.isListView) {
                     LazyColumn {
@@ -179,7 +182,7 @@ fun FavoritesScreen(
                                             navController.navigate(Screen.CityMapScreen.route)
                                         }
                                     )
-                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Spacer(modifier = Modifier.height(10.dp))
                                 }
                             }
                         }

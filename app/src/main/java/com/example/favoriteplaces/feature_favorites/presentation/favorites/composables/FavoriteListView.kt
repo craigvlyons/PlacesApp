@@ -2,6 +2,7 @@ package com.example.favoriteplaces.feature_favorites.presentation.favorites.comp
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -78,28 +79,27 @@ fun FavoriteListView(
             favoritesList.favorites.forEach {
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .clickable(onClick = { onEditSelect(it) })
+                        .padding(vertical = 8.dp)
+                        .padding(end = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.Bottom,
+
                 ) {
                     Text(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f),
                         text = it.title,
                         style = MaterialTheme.typography.body1,
                         color = MaterialTheme.colors.onSurface,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
-                    IconButton(
-                        onClick = {
-                            onEditSelect(it)
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.EditNote,
-                            contentDescription = "Edit favorite"
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Default.EditNote,
+                        contentDescription = "Edit favorite"
+                    )
                 }
             }
         }
