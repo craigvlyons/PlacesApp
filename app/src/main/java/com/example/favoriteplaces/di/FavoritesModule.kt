@@ -12,6 +12,7 @@ import com.example.favoriteplaces.feature_favorites.domain.use_case.cacheusecase
 import com.example.favoriteplaces.feature_favorites.domain.use_case.cacheusecase.SaveMapItemsUseCase
 import com.example.favoriteplaces.feature_favorites.domain.use_case.localusecase.AddFavoriteUseCase
 import com.example.favoriteplaces.feature_favorites.domain.use_case.localusecase.DeleteFavoriteUseCase
+import com.example.favoriteplaces.feature_favorites.domain.use_case.localusecase.FavoriteExistsByPlaceIdUseCase
 import com.example.favoriteplaces.feature_favorites.domain.use_case.localusecase.FavoriteUseCases
 import com.example.favoriteplaces.feature_favorites.domain.use_case.localusecase.GetAllCitiesUseCase
 import com.example.favoriteplaces.feature_favorites.domain.use_case.localusecase.GetFavoriteUseCase
@@ -52,7 +53,8 @@ object FavoritesModule {
             updateIsFavorite = UpdateIsFavorite(repository),
             addFavorite = AddFavoriteUseCase(repository),
             getAllCities = GetAllCitiesUseCase(repository),
-            getFavoritesByCityAndColor = GetFavoritesByCityAndColorUseCase(repository)
+            getFavoritesByCityAndColor = GetFavoritesByCityAndColorUseCase(repository),
+            favoriteExistsByPlaceIdUseCase = FavoriteExistsByPlaceIdUseCase(repository)
         )
     }
 

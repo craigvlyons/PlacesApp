@@ -16,6 +16,9 @@ interface FavoriteDao {
     @Query("SELECT * FROM Favorite Where id = :id")
     suspend fun getFavoriteByID(id: Int): Favorite?
 
+    @Query("SELECT COUNT(*) > 0 FROM Favorite WHERE placeId = :placeId")
+    suspend fun isFavoriteExists(placeId: String): Boolean
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFavorite(favorite: Favorite)
 

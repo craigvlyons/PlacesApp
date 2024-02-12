@@ -30,8 +30,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -45,6 +47,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.flow.collectLatest
 
 
+@OptIn(ExperimentalComposeUiApi::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun AddNewFavorite(
@@ -59,6 +62,8 @@ fun AddNewFavorite(
     val currentLocation by viewModel.currentLocation
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
+
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     when (locationPermissionState) {
         is LocationPermissionState.RequestPermission -> {
@@ -183,7 +188,10 @@ fun AddNewFavorite(
                 ) {
                     Button(
                         modifier = Modifier,
-                        onClick = { viewModel.onEvent(AddNewFavoriteEvent.Search) },
+                        onClick = {
+                            viewModel.onEvent(AddNewFavoriteEvent.Search)
+                                  keyboardController?.hide()
+                                  },
 
                         ) {
                         Text(
