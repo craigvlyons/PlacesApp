@@ -5,7 +5,8 @@ import com.example.favoriteplaces.feature_favorites.domain.model.Favorite
 import com.example.favoriteplaces.feature_favorites.domain.repository.FavoriteRepository
 import kotlinx.coroutines.flow.Flow
 
-class FavoriteRepositoryImpl(
+class
+FavoriteRepositoryImpl(
     private val dao: FavoriteDao
 ): FavoriteRepository {
     override fun getFavorites(): Flow<List<Favorite>> {
@@ -14,6 +15,10 @@ class FavoriteRepositoryImpl(
 
     override suspend fun getFavoriteById(id: Int): Favorite? {
         return dao.getFavoriteByID(id)
+    }
+
+    override suspend fun checkFavoriteExistsByPlaceId(placeId: String): Boolean {
+        return dao.isFavoriteExists(placeId)
     }
 
     override suspend fun insertFavorite(favorite: Favorite) {

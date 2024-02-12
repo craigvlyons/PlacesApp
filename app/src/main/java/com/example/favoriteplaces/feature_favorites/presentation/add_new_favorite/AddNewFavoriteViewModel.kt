@@ -37,7 +37,7 @@ class AddNewFavoriteViewModel @Inject constructor(
     private val geoCoder: Geocoder,
     private val getPredictionsUseCase: GetPredictionsUseCase,
     private val getPlaceDetailsUseCase: GetPlaceDetailsUseCase,
-    private val favoriteUseCases: FavoriteUseCases
+    private val favoriteUseCases: FavoriteUseCases,
 ) : ViewModel() {
     var locationState by mutableStateOf<LocationPermissionState>(LocationPermissionState.NoPermission)
     var isLoading = false
@@ -102,6 +102,10 @@ class AddNewFavoriteViewModel @Inject constructor(
                 convertPredictionToFavorite(event.predictionResult)
                 viewModelScope.launch {
                     try {
+                        val favoriteExists = _uiState.value.favorite?.placeId?.let { favoriteUseCases.favoriteExistsByPlaceIdUseCase(it) }
+                        if (favoriteExists != null && favoriteExists == true){
+                            throw Exception("Favorite Place already exists!")
+                        }
                         _uiState.value.favorite?.let { favoriteUseCases.addFavorite(it) }
                         _eventFlow.emit(UiEvent.SaveFavorite)
                     } catch (e: Exception) {

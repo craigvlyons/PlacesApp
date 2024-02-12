@@ -8,6 +8,8 @@ interface FavoriteRepository {
 
     suspend fun getFavoriteById(id: Int): Favorite?
 
+    suspend fun checkFavoriteExistsByPlaceId(placeId: String): Boolean
+
     suspend fun insertFavorite(favorite: Favorite)
 
     suspend fun updateIsFavorite(id: Int, isFavorite: Boolean)
