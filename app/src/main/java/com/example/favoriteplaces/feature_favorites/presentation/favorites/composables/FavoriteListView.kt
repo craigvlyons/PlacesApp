@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.favoriteplaces.feature_favorites.domain.model.ColorVariation
 import com.example.favoriteplaces.feature_favorites.domain.model.Favorite
+import com.example.favoriteplaces.feature_favorites.presentation.sharedcomposables.SwipeToDeleteContainer
 
 
 @Composable
@@ -41,7 +42,8 @@ fun FavoriteListView(
     modifier: Modifier = Modifier,
     cornerRadius: Dp = 10.dp,
     onEditSelect: (favorite: Favorite) -> Unit,
-    onMapSelect: (city: String, favoriteList: ColorVariation) -> Unit
+    onMapSelect: (city: String, favoriteList: ColorVariation) -> Unit,
+    onDelete: (favorite: Favorite) -> Unit
 ) {
     Box(
         modifier = modifier
@@ -76,31 +78,60 @@ fun FavoriteListView(
                 color = MaterialTheme.colors.onSurface,
             )
             Divider(thickness = 1.dp, color = Color.DarkGray)
-            favoritesList.favorites.forEach {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(onClick = { onEditSelect(it) })
-                        .padding(vertical = 8.dp)
-                        .padding(end = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Bottom,
+            favoritesList.favorites.forEach {favortie ->
+                SwipeToDeleteContainer(
+                    item = favortie,
+                    onDelete = { onDelete(it) },
+                    content = {fav ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable(onClick = { onEditSelect(fav) })
+                                .padding(vertical = 8.dp)
+                                .padding(end = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.Bottom,
 
-                ) {
-                    Text(
-                        modifier = Modifier
-                            .weight(1f),
-                        text = it.title,
-                        style = MaterialTheme.typography.body1,
-                        color = MaterialTheme.colors.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Icon(
-                        imageVector = Icons.Default.EditNote,
-                        contentDescription = "Edit favorite"
-                    )
-                }
+                            ) {
+                            Text(
+                                modifier = Modifier
+                                    .weight(1f),
+                                text = fav.title,
+                                style = MaterialTheme.typography.body1,
+                                color = MaterialTheme.colors.onSurface,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            Icon(
+                                imageVector = Icons.Default.EditNote,
+                                contentDescription = "Edit favorite"
+                            )
+                        }
+                    })
+//                Row(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .clickable(onClick = { onEditSelect(it) })
+//                        .padding(vertical = 8.dp)
+//                        .padding(end = 8.dp),
+//                    horizontalArrangement = Arrangement.SpaceBetween,
+//                    verticalAlignment = Alignment.Bottom,
+//
+//                ) {
+//                    Text(
+//                        modifier = Modifier
+//                            .weight(1f),
+//                        text = it.title,
+//                        style = MaterialTheme.typography.body1,
+//                        color = MaterialTheme.colors.onSurface,
+//                        maxLines = 1,
+//                        overflow = TextOverflow.Ellipsis,
+//                    )
+//                    Icon(
+//                        imageVector = Icons.Default.EditNote,
+//                        contentDescription = "Edit favorite"
+//                    )
+//                }
             }
         }
         IconButton(

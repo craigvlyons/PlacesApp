@@ -180,6 +180,18 @@ fun FavoritesScreen(
                                         onMapSelect = { city, favoriteList ->
                                             viewModel.onEvent(FavoritesEvent.CityMapSelect(city, favoriteList))
                                             navController.navigate(Screen.CityMapScreen.route)
+                                        },
+                                        onDelete = {
+                                            favoriteToDelete -> viewModel.onEvent(FavoritesEvent.DeleteFavorite(favoriteToDelete))
+                                            scope.launch {
+                                                val result = scaffoldState.snackbarHostState.showSnackbar(
+                                                    message = "Favorite has been deleted",
+                                                    actionLabel = "Undo"
+                                                )
+                                                if (result == SnackbarResult.ActionPerformed) {
+                                                    viewModel.onEvent(FavoritesEvent.RestoreFavorite)
+                                                }
+                                            }
                                         }
                                     )
                                     Spacer(modifier = Modifier.height(10.dp))
