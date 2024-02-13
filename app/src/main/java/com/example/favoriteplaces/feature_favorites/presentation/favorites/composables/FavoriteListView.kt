@@ -107,31 +107,8 @@ fun FavoriteListView(
                                 contentDescription = "Edit favorite"
                             )
                         }
-                    })
-//                Row(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .clickable(onClick = { onEditSelect(it) })
-//                        .padding(vertical = 8.dp)
-//                        .padding(end = 8.dp),
-//                    horizontalArrangement = Arrangement.SpaceBetween,
-//                    verticalAlignment = Alignment.Bottom,
-//
-//                ) {
-//                    Text(
-//                        modifier = Modifier
-//                            .weight(1f),
-//                        text = it.title,
-//                        style = MaterialTheme.typography.body1,
-//                        color = MaterialTheme.colors.onSurface,
-//                        maxLines = 1,
-//                        overflow = TextOverflow.Ellipsis,
-//                    )
-//                    Icon(
-//                        imageVector = Icons.Default.EditNote,
-//                        contentDescription = "Edit favorite"
-//                    )
-//                }
+                    }
+                )
             }
         }
         IconButton(
