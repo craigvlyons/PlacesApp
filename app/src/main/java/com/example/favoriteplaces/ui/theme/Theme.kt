@@ -1,76 +1,39 @@
 package com.example.favoriteplaces.ui.theme
 
-import android.app.Activity
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
-import androidx.core.view.WindowCompat
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.graphics.luminance
+import com.example.favoriteplaces.feature_favorites.domain.model.settings.DEFAULT_APP_COLOR_ARGB
 
-private val DarkColorScheme = darkColorScheme(
-    primary = accent, // buttons
-    secondary = lighterAccent, // inactive buttons
-    tertiary = accent, // highlights of elements
-    background = primaryDark,
-    onBackground = primaryLight,
-    onSurface = neutral100,
+private fun lightColors(appColor: Color) = lightColorScheme(
+    primary = appColor,
+    onPrimary = readableContentColor(appColor),
+    primaryContainer = appColor.copy(alpha = 0.24f).compositeOver(AppSurface),
+    onPrimaryContainer = AppInk,
+    secondary = Color(0xFF53665F),
+    background = AppCanvas,
+    onBackground = AppInk,
+    surface = AppSurface,
+    onSurface = AppInk,
+    surfaceVariant = Color(0xFFE2E9E4),
+    onSurfaceVariant = Color(0xFF424B46),
+    outline = Color(0xFF727B76),
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = accent, // buttons
-    secondary = lighterAccent, // inactive buttons
-    tertiary = accent, // highlights of elements
-    background = primaryDark,
-    onBackground = primaryLight,
-    onSurface = neutral100,
-
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
-)
+fun readableContentColor(background: Color): Color =
+    if (background.luminance() > 0.48f) Color(0xFF202126) else Color.White
 
 @Composable
 fun FavoritePlacesTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    appColor: Int = DEFAULT_APP_COLOR_ARGB,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-    val view = LocalView.current
-    if (!view.isInEditMode) {
-        SideEffect {
-            val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
-        }
-    }
-
+    val accent = Color(appColor)
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = lightColors(accent),
         typography = Typography,
         content = content
     )

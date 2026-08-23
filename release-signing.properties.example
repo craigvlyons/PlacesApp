@@ -1,0 +1,6 @@
+# Copy this file to release-signing.properties and keep the completed file out of Git.
+# Prefer an absolute storeFile path outside this repository.
+storeFile=local-signing/places-release.p12
+storePassword=REPLACE_WITH_A_STRONG_UNIQUE_PASSWORD
+keyAlias=places-release
+keyPassword=REPLACE_WITH_A_STRONG_UNIQUE_PASSWORD

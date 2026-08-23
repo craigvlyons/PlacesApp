@@ -14,14 +14,15 @@
       --phone: #f8f7f2;
       --surface: #fffefa;
       --line: #dce1db;
-      --green: #006b58;
-      --green-dark: #075648;
-      --green-soft: #d8f2e9;
-      --saved-color-1: #ef876f;
-      --saved-color-2: #e7ca58;
-      --saved-color-3: #a67bce;
-      --saved-color-4: #57bdaa;
-      --saved-color-5: #65a8cd;
+      --green: #81deea;
+      --green-dark: #315f7e;
+      --green-soft: #dff7fa;
+      --saved-color-1: #ffab91;
+      --saved-color-2: #e7ed9b;
+      --saved-color-3: #cf94da;
+      --saved-color-4: #81deea;
+      --saved-color-5: #3c6e91;
+      --saved-color-6: #f48fb1;
       --shadow: 0 22px 60px rgb(28 40 34 / 14%);
     }
 
@@ -121,6 +122,17 @@
     .header-view-toggle { display: flex; padding: 3px; border-radius: 11px; background: #e9ece7; }
     .header-view-toggle button { min-height: 32px; padding: 0 9px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font-size: 11px; cursor: pointer; }
     .header-view-toggle button.active { background: var(--surface); color: var(--ink); box-shadow: 0 2px 6px rgb(28 40 34 / 8%); }
+    .nearby-app-bar { display: block; background: var(--green); }
+    .nearby-source-toggle { display: grid; grid-template-columns: 1fr 1fr; padding: 3px; border-radius: 12px; background: rgb(49 95 126 / 14%); }
+    .nearby-source-toggle button { min-height: 32px; border: 0; border-radius: 9px; background: transparent; color: rgb(23 32 28 / 78%); font-size: 11px; font-weight: 700; cursor: pointer; }
+    .nearby-source-toggle button.active { background: #fff; color: var(--green-dark); box-shadow: 0 2px 8px rgb(25 45 35 / 15%); }
+    .nearby-compact-row { min-height: 43px; display: flex; align-items: center; gap: 8px; }
+    .nearby-compact-row .header-view-toggle { flex: 0 0 auto; }
+    .nearby-location-link { min-width: 0; margin-left: auto; padding: 7px 0 7px 8px; overflow: hidden; border: 0; background: transparent; color: var(--green-dark); font-size: 12px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+    .nearby-map-demo { position: relative; min-height: 430px; overflow: hidden; border: 1px solid var(--line); border-radius: 15px; background: linear-gradient(25deg, transparent 46%, white 47% 51%, transparent 52%) 0 0 / 150px 110px, linear-gradient(110deg, transparent 46%, white 47% 51%, transparent 52%) 15px 20px / 180px 130px, #dce9db; }
+    .nearby-map-demo .pin { position: absolute; width: 22px; height: 22px; border: 3px solid white; border-radius: 50% 50% 50% 0; background: var(--pin-color); box-shadow: 0 3px 8px rgb(0 0 0 / 22%); transform: rotate(-45deg); }
+    .nearby-map-demo .pin.current { border-radius: 50%; background: #3c6e91; transform: none; }
+    .nearby-map-demo .fit-all { position: absolute; right: 10px; top: 10px; min-height: 34px; padding: 0 11px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); font-size: 11px; font-weight: 700; }
 
     .search-field { position: relative; margin-bottom: 10px; }
     .search-field input { width: 100%; min-height: 48px; padding: 0 42px 0 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--ink); outline: 0; }
@@ -169,6 +181,7 @@
     .place-card.color-three { --place-color: var(--saved-color-3); }
     .place-card.color-four { --place-color: var(--saved-color-4); }
     .place-card.color-five { --place-color: var(--saved-color-5); }
+    .place-card.color-six { --place-color: var(--saved-color-6); }
     .place-name-row { display: flex; align-items: start; justify-content: space-between; gap: 10px; }
     .place-name-row strong { font-size: 15px; line-height: 1.2; }
     .heart { color: #c53f62; font-size: 15px; }
@@ -498,12 +511,16 @@
         compact: { saved: new Map(), find: new Map(), nearby: new Map() }
       },
       distance: 10,
+      nearbySource: 'ours',
+      nearbyView: 'list',
       locationLabel: 'Colorado Springs, CO',
       usingCurrentLocation: true,
       filterContext: null,
       pendingFilterValue: null,
       pendingFilters: new Map(),
       pendingDistance: 10,
+      nearbySavedAnyDistance: true,
+      pendingAnyDistance: true,
       pendingLocationLabel: null,
       selectingFromMap: false,
       editColor: 'color-four',
@@ -534,7 +551,7 @@
       return `<div class="place-list">${places.slice(0, isNearby ? 3 : 4).map((place, index) => `
         <article class="place-card ${place.color} ${isNearby ? 'nearby-card' : ''}" ${isNearby ? '' : 'data-edit-place role="button" tabindex="0" aria-label="Edit ' + place.name + '"'}>
           <div class="place-name-row"><strong>${place.name}</strong>${place.favorite ? '<span class="heart" aria-label="Favorite">♥</span>' : ''}</div>
-          <div class="place-meta">${place.type} · ${place.city}</div>
+          <div class="place-meta">${place.type}</div>
           <p class="place-note">${place.note}</p>
           ${isNearby ? `<div class="distance">${['0.8', '1.2', '2.1'][index]} miles away</div>` : ''}
         </article>`).join('')}</div>`;
@@ -578,12 +595,16 @@
 
     function nearbyScreen(style) {
       const selected = filtersFor(style, 'nearby');
-      return `<header class="app-bar"><strong>Nearby</strong><div class="header-view-toggle" aria-label="Nearby view"><button class="active">List</button><button>Map</button></div></header>
+      const ours = appState.nearbySource === 'ours';
+      const map = appState.nearbyView === 'map';
+      const mapDemo = `<div class="nearby-map-demo" aria-label="Map of ${ours ? 'saved' : 'new'} places"><button class="fit-all">Fit all</button><i class="pin current" style="left:48%;top:48%"></i><i class="pin" style="--pin-color:var(--saved-color-2);left:25%;top:24%"></i><i class="pin" style="--pin-color:var(--saved-color-4);left:67%;top:35%"></i><i class="pin" style="--pin-color:var(--saved-color-3);left:39%;top:72%"></i></div>`;
+      const newPlaces = `<div class="suggestion"><span class="suggestion-icon">⌖</span><div><strong>Tacos El Amigo</strong><small>Mexican restaurant · 0.8 mi</small></div><button class="save-action">Save</button></div><div class="suggestion"><span class="suggestion-icon">⌖</span><div><strong>Tacos Del Gordo</strong><small>Mexican restaurant · 2.4 mi</small></div><button class="save-action">Save</button></div>`;
+      return `<header class="app-bar nearby-app-bar"><div class="nearby-source-toggle" aria-label="Nearby source"><button data-nearby-source="ours" class="${ours ? 'active' : ''}">Our places</button><button data-nearby-source="new" class="${ours ? '' : 'active'}">New places</button></div></header>
         <div class="screen-content">
-          <div class="nearby-origin-compact"><div><small>${appState.usingCurrentLocation ? 'CURRENT LOCATION' : 'SEARCH AREA'}</small><strong>${appState.locationLabel}</strong></div><button data-location-picker>Edit</button></div>
+          <div class="nearby-compact-row"><div class="header-view-toggle" aria-label="Nearby view"><button data-nearby-view="list" class="${map ? '' : 'active'}">List</button><button data-nearby-view="map" class="${map ? 'active' : ''}">Map</button></div><button class="nearby-location-link" data-location-picker>${appState.locationLabel.split(',')[0]}</button></div>
           <div class="filter-toolbar"><button class="filter-text-button" data-open-filters>Filter${selected.size ? ` · ${selected.size}` : ''}</button></div>
-          <div class="results-heading"><strong>3 places nearby</strong><button>Nearest first</button></div>
-          ${cards(true)}
+          <div class="results-heading"><strong>${ours ? '4 saved places' : '2 new places'}</strong><button>${ours ? 'Nearest first' : 'Google Maps'}</button></div>
+          ${map ? mapDemo : ours ? cards(true) : newPlaces}
         </div>${nav('nearby')}`;
     }
 
@@ -593,7 +614,8 @@
         ['color-two', 'var(--saved-color-2)'],
         ['color-three', 'var(--saved-color-3)'],
         ['color-four', 'var(--saved-color-4)'],
-        ['color-five', 'var(--saved-color-5)']
+        ['color-five', 'var(--saved-color-5)'],
+        ['color-six', 'var(--saved-color-6)']
       ];
       const selectedColor = colorChoices.find(([key]) => key === appState.editColor)?.[1] || 'var(--saved-color-4)';
       return `<header class="app-bar edit-app-bar" style="--edit-color:${selectedColor}"><button class="icon-button back-button" data-back-saved aria-label="Back to saved places">‹</button><strong>Edit place</strong><div class="edit-header-actions"><button class="favorite-heart-button" data-toggle-favorite aria-label="${appState.editFavorite ? 'Remove from favorites' : 'Add to favorites'}" aria-pressed="${appState.editFavorite}">${appState.editFavorite ? '♥' : '♡'}</button><button class="header-save" data-save-edit>Save</button></div></header>
@@ -624,6 +646,8 @@
         renderAll();
       }));
       phone.querySelectorAll('[data-location-picker]').forEach(button => button.addEventListener('click', openLocationSheet));
+      phone.querySelectorAll('[data-nearby-source]').forEach(button => button.addEventListener('click', () => { appState.nearbySource = button.dataset.nearbySource; renderAll(); }));
+      phone.querySelectorAll('[data-nearby-view]').forEach(button => button.addEventListener('click', () => { appState.nearbyView = button.dataset.nearbyView; renderAll(); }));
       phone.querySelectorAll('[data-preview-place]').forEach(button => button.addEventListener('click', () => openPlacePreview(button.dataset.previewPlace, button.dataset.previewAddress)));
       phone.querySelectorAll('[data-edit-place]').forEach(card => {
         const openEdit = () => { appState.screen = 'edit'; renderAll(); };
@@ -640,7 +664,7 @@
     const filterChoices = {
       type: ['Restaurant', 'Coffee', 'Brewery', 'Outdoors'],
       city: ['Colorado Springs', 'Denver', 'Manitou Springs'],
-      color: ['var(--saved-color-1)', 'var(--saved-color-2)', 'var(--saved-color-3)', 'var(--saved-color-4)', 'var(--saved-color-5)'],
+      color: ['var(--saved-color-1)', 'var(--saved-color-2)', 'var(--saved-color-3)', 'var(--saved-color-4)', 'var(--saved-color-5)', 'var(--saved-color-6)'],
       favorite: ['♥ Favorites only'],
       preset: ['Closest first', 'Favorites nearby', 'Highly rated']
     };
@@ -656,8 +680,10 @@
 
     function renderFilterSheetContent() {
       const nearby = appState.filterContext.screen === 'nearby';
-      const keys = nearby ? ['type', 'color', 'favorite', 'preset'] : appState.filterContext.screen === 'find' ? ['type'] : ['type', 'city', 'color', 'favorite'];
-      const distance = nearby ? `<section class="sheet-distance"><h3>Distance</h3><div class="distance-control"><span>Radius · miles</span><button data-sheet-distance="-5" aria-label="Decrease distance">−</button><input id="sheetDistanceInput" type="number" min="1" max="100" value="${appState.pendingDistance}" aria-label="Distance in miles"><button data-sheet-distance="5" aria-label="Increase distance">+</button></div></section>` : '';
+      const savedNearby = nearby && appState.nearbySource === 'ours';
+      const keys = savedNearby ? ['type', 'color', 'favorite', 'preset'] : nearby ? ['type'] : appState.filterContext.screen === 'find' ? ['type'] : ['type', 'city', 'color', 'favorite'];
+      const distanceControl = `<div class="distance-control"><span>Radius · miles</span><button data-sheet-distance="-5" aria-label="Decrease distance">−</button><input id="sheetDistanceInput" type="number" min="1" max="100" value="${appState.pendingDistance}" aria-label="Distance in miles"><button data-sheet-distance="5" aria-label="Increase distance">+</button></div>`;
+      const distance = nearby ? `<section class="sheet-distance"><h3>Distance</h3>${savedNearby ? `<div class="filter-sheet-grid"><button class="sheet-option ${appState.pendingAnyDistance ? 'selected' : ''}" data-distance-mode="any">Any distance</button><button class="sheet-option ${appState.pendingAnyDistance ? '' : 'selected'}" data-distance-mode="within">Within</button></div>${appState.pendingAnyDistance ? '' : distanceControl}` : distanceControl}</section>` : '';
       const sections = keys.map(key => `<section class="filter-sheet-section"><h3>${key === 'preset' ? 'Quick preset' : key[0].toUpperCase() + key.slice(1)}</h3><div class="filter-sheet-grid">${filterChoices[key].map((value, index) => `<button class="sheet-option ${key === 'color' ? 'color-filter-option' : ''} ${appState.pendingFilters.get(key) === value ? 'selected' : ''}" data-filter-key="${key}" data-filter-option="${value}" ${key === 'color' ? `aria-label="Color option ${index + 1} of ${filterChoices[key].length}"` : ''}>${key === 'color' ? `<i class="filter-color-dot" style="--filter-color:${value}"></i>` : value}</button>`).join('')}</div></section>`).join('');
       document.getElementById('filterOptions').innerHTML = distance + sections;
 
@@ -668,6 +694,10 @@
       }));
       document.querySelectorAll('[data-sheet-distance]').forEach(button => button.addEventListener('click', () => {
         appState.pendingDistance = Math.min(100, Math.max(1, appState.pendingDistance + Number(button.dataset.sheetDistance)));
+        renderFilterSheetContent();
+      }));
+      document.querySelectorAll('[data-distance-mode]').forEach(button => button.addEventListener('click', () => {
+        appState.pendingAnyDistance = button.dataset.distanceMode === 'any';
         renderFilterSheetContent();
       }));
       const distanceInput = document.getElementById('sheetDistanceInput');
@@ -681,8 +711,9 @@
       appState.filterContext = { style, screen };
       appState.pendingFilters = new Map(filtersFor(style, screen));
       appState.pendingDistance = appState.distance;
+      appState.pendingAnyDistance = appState.nearbySavedAnyDistance;
       document.getElementById('filterSheetTitle').textContent = screen === 'nearby' ? 'Nearby filters' : screen === 'find' ? 'Search filters' : 'Saved filters';
-      document.getElementById('filterSheetDescription').textContent = screen === 'nearby' ? 'Set distance, type, color, Favorite, or a quick preset.' : screen === 'find' ? 'Limit Google Places results by place type.' : 'Filter saved places by type, city, color, or Favorite.';
+      document.getElementById('filterSheetDescription').textContent = screen === 'nearby' && appState.nearbySource === 'ours' ? 'Filter saved places by optional distance, type, color, Favorite, or rating.' : screen === 'nearby' ? 'Set the Google discovery distance and place type.' : screen === 'find' ? 'Limit Google Places results by place type.' : 'Filter saved places by type, city, color, or Favorite.';
       renderFilterSheetContent();
       filterOverlay.classList.add('open');
       document.body.style.overflow = 'hidden';
@@ -729,6 +760,7 @@
       if (appState.filterContext) {
         appState.filters[appState.filterContext.style][appState.filterContext.screen] = new Map(appState.pendingFilters);
         if (appState.filterContext.screen === 'nearby') appState.distance = appState.pendingDistance;
+        if (appState.filterContext.screen === 'nearby' && appState.nearbySource === 'ours') appState.nearbySavedAnyDistance = appState.pendingAnyDistance;
       }
       closeOverlays();
       renderAll();
@@ -736,7 +768,7 @@
 
     document.getElementById('removeCurrentFilter').addEventListener('click', () => {
       appState.pendingFilters.clear();
-      if (appState.filterContext?.screen === 'nearby') appState.pendingDistance = 10;
+      if (appState.filterContext?.screen === 'nearby') { appState.pendingDistance = 10; appState.pendingAnyDistance = true; }
       renderFilterSheetContent();
     });
 

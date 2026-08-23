@@ -1,171 +1,180 @@
 package com.example.favoriteplaces.feature_favorites.presentation.favorites.composables
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.StarBorder
-import androidx.compose.material3.Divider
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Map
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.clipPath
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.favoriteplaces.feature_favorites.domain.model.Favorite
-import com.example.favoriteplaces.feature_favorites.presentation.sharedcomposables.LovedButton
-
 
 @Composable
 fun FavoriteItem(
     favorite: Favorite,
     modifier: Modifier = Modifier,
-    cornerRadius: Dp = 10.dp,
-    onDeleteClick: () -> Unit,
-    onLovedClick: (Boolean) -> Unit
+    onOpen: () -> Unit,
+    onMapClick: () -> Unit,
+    onLovedClick: (Boolean) -> Unit,
+    actionsExpanded: Boolean,
+    actionsLoading: Boolean,
+    onActionsToggle: () -> Unit,
+    onCall: () -> Unit,
+    onReserve: () -> Unit,
+    onWeb: () -> Unit,
 ) {
-    var isLoved by remember {
-        mutableStateOf(favorite.isFavorite)
-    }
-    Box(
-        modifier = modifier
-            .shadow(6.dp, shape = RoundedCornerShape(cornerRadius))
-            .border(1.dp, Color(favorite.color), shape = RoundedCornerShape(cornerRadius))
+    val canCall = !favorite.phoneNumber.isNullOrBlank()
+    val canReserve = com.example.favoriteplaces.feature_favorites.domain.model.places
+        .isReservationEligibleGoogleType(favorite.googlePrimaryType)
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
-        Canvas(modifier = Modifier.matchParentSize()) {
-            val clipPath = Path().apply {
-                lineTo(size.width, 0f)
-                lineTo(size.width, 0f)
-                lineTo(size.width, size.height)
-                lineTo(0f, size.height)
-                close()
-            }
-
-            clipPath(clipPath) {
-                drawRoundRect(
-                    color = Color(favorite.color),
-                    size = size,
-                    cornerRadius = CornerRadius(cornerRadius.toPx())
-                )
-            }
-        }
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
+            modifier = Modifier.fillMaxWidth()
+                .drawBehind {
+                    drawRect(Color(favorite.color), size = Size(6.dp.toPx(), size.height))
+                },
         ) {
-            Text(
-                text = favorite.title,
-                style = MaterialTheme.typography.h5,
-                color = MaterialTheme.colors.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Divider(modifier = Modifier , 1.dp  ,Color.DarkGray)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(role = Role.Button, onClick = onOpen)
+                    .padding(start = 20.dp, top = 14.dp, bottom = 6.dp),
             ) {
-                RatingStars(rating = favorite.rating ?: 0)
-                LovedButton(
-                    modifier = Modifier.padding(end = 6.dp),
-                    isFavorite = isLoved,
-                    onClick = { onLovedClick(it) }
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top,
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 8.dp)
+                            .testTag("favorite_text_${favorite.id}"),
+                    ) {
+                        Text(
+                            text = favorite.title,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            text = favorite.address,
+                            modifier = Modifier.padding(top = 4.dp),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        favorite.content?.takeIf(String::isNotBlank)?.let { notes ->
+                            Text(
+                                modifier = Modifier.padding(top = 12.dp),
+                                text = notes,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 3,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                    Column(horizontalAlignment = Alignment.End) {
+                        Box(
+                            modifier = Modifier.height(RATING_SLOT_SIZE),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            CompactPlaceRating(
+                                rating = favorite.rating,
+                                modifier = Modifier
+                                    .padding(end = 8.dp)
+                                    .testTag("favorite_rating_${favorite.id}"),
+                            )
+                        }
+                        IconButton(
+                            modifier = Modifier
+                                .testTag("favorite_heart_${favorite.id}")
+                                .semantics { selected = favorite.isFavorite },
+                            onClick = { onLovedClick(!favorite.isFavorite) },
+                        ) {
+                            Icon(
+                                imageVector = if (favorite.isFavorite) {
+                                    Icons.Default.Favorite
+                                } else {
+                                    Icons.Default.FavoriteBorder
+                                },
+                                modifier = Modifier
+                                    .offset(y = 6.dp)
+                                    .testTag("favorite_heart_visual_${favorite.id}"),
+                                contentDescription = if (favorite.isFavorite) {
+                                    "Remove from Favorites"
+                                } else {
+                                    "Add to Favorites"
+                                },
+                                tint = if (favorite.isFavorite) {
+                                    MaterialTheme.colorScheme.error
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                },
+                            )
+                        }
+                        IconButton(
+                            modifier = Modifier
+                                .testTag("favorite_map_${favorite.id}"),
+                            onClick = onMapClick,
+                        ) {
+                            Icon(
+                                Icons.Default.Map,
+                                modifier = Modifier.testTag("favorite_map_visual_${favorite.id}"),
+                                contentDescription = "Show ${favorite.title} on map",
+                            )
+                        }
+                    }
+                }
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = favorite.address,
-                style = MaterialTheme.typography.caption,
-                color = MaterialTheme.colors.onSurface,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = favorite.content!!,
-                style = MaterialTheme.typography.body1,
-                color = MaterialTheme.colors.onSurface,
-                maxLines = 5,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-        IconButton(
-            onClick = onDeleteClick,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                //.padding(end = 8.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = "Delete favorite",
-                tint = MaterialTheme.colors.onSurface
+            PlaceActionDisclosure(
+                placeId = favorite.id,
+                placeName = favorite.title,
+                canCall = canCall,
+                canReserve = canReserve,
+                expanded = actionsExpanded,
+                loading = actionsLoading,
+                showDivider = true,
+                onToggle = onActionsToggle,
+                onCall = onCall,
+                onReserve = onReserve,
+                onWeb = onWeb,
             )
         }
     }
 }
 
-@Composable
-@Preview
-fun FavoriteItemPreview() {
-    val sampleFavorite = Favorite(
-        id = 1,
-        title = "Sample Title",
-        address = "123 Sample Street",
-        content = "This is a sample content for the favorite item. It can be a longer text.",
-        rating = 3,
-        city = "Sample City",
-        latitude = 12.345,
-        longitude = 67.890
-    )
-
-    FavoriteItem(favorite = sampleFavorite, onDeleteClick = {}, onLovedClick = {})
-}
-
-@Composable
-fun RatingStars(
-    rating: Int,
-    maxRating: Int = 5,
-    activeStar: ImageVector = Icons.Default.Star,
-    inactiveStar: ImageVector = Icons.Default.StarBorder
-) {
-    Row {
-        repeat(maxRating) { index ->
-            Icon(
-                imageVector = if (index < rating) activeStar else inactiveStar,
-                contentDescription = if (index < rating) "Active Star" else "Inactive Star",
-                tint = if (index < rating) Color.Yellow else Color.Gray,
-                modifier = Modifier.padding(2.dp)
-            )
-        }
-    }
-}
+private val RATING_SLOT_SIZE = 24.dp

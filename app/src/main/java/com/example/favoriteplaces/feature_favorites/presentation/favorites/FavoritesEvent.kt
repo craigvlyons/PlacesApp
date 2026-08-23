@@ -1,18 +1,15 @@
 package com.example.favoriteplaces.feature_favorites.presentation.favorites
 
-import com.example.favoriteplaces.feature_favorites.domain.model.ColorVariation
 import com.example.favoriteplaces.feature_favorites.domain.model.Favorite
-import com.example.favoriteplaces.feature_favorites.presentation.util.FavoriteOrder
+import com.example.favoriteplaces.feature_favorites.domain.model.settings.FavoriteOrder
 
-sealed class FavoritesEvent{
-    // actions with passing values,
-    data class Order(val favoriteOrder: FavoriteOrder): FavoritesEvent()
-    data class DeleteFavorite(val favorite: Favorite): FavoritesEvent()
-    data class LovedFavorite(val id: Int , val isFavorite: Boolean): FavoritesEvent()
-    data class CityMapSelect(val city: String , val colorVariation: ColorVariation): FavoritesEvent()
-
-    // actions
-    object RestoreFavorite: FavoritesEvent()
-    object ToggleOrderSelection: FavoritesEvent()
-    object ToggleListOrCardView: FavoritesEvent()
+sealed interface FavoritesEvent {
+    data class Order(val favoriteOrder: FavoriteOrder) : FavoritesEvent
+    data class DeleteFavorite(val favorite: Favorite) : FavoritesEvent
+    data class RestoreFavorite(val favorite: Favorite) : FavoritesEvent
+    data class LovedFavorite(val id: Int, val isFavorite: Boolean) : FavoritesEvent
+    data class ApplyFilters(val filters: SavedPlacesFilters) : FavoritesEvent
+    data object ToggleListOrCardView : FavoritesEvent
+    data object ClearFilters : FavoritesEvent
+    data object RetryLoading : FavoritesEvent
 }

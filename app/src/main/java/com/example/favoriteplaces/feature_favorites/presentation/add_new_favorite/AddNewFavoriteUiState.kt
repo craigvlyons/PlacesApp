@@ -1,14 +1,25 @@
 package com.example.favoriteplaces.feature_favorites.presentation.add_new_favorite
 
-import com.example.favoriteplaces.feature_favorites.data.models.predicition.Prediction
-import com.example.favoriteplaces.feature_favorites.domain.model.Favorite
-import com.google.android.gms.maps.model.LatLng
+import com.example.favoriteplaces.feature_favorites.domain.model.places.PlacePrediction
+import com.example.favoriteplaces.feature_favorites.domain.model.GeoCoordinates
 
 
 data class AddNewFavoriteUiState(
-    val predictions: List<Prediction> = emptyList(),
-    val favorite: Favorite? = null,
-    val currentLocation: LatLng? = null,
-    val isMapVisible: Boolean = false
-    // Add more UI-related properties as needed
+    val searchField: AddFavoriteTextFieldState = AddFavoriteTextFieldState(
+        hint = "Search for place..."
+    ),
+    val predictions: List<PlacePrediction> = emptyList(),
+    val selectedPlaceId: String? = null,
+    val thirdPartyAttributions: List<String> = emptyList(),
+    val locationState: LocationPermissionState = LocationPermissionState.NoPermission,
+    val mapCoordinates: GeoCoordinates = GeoCoordinates(0.0, 0.0),
+    val isMapVisible: Boolean = false,
+    val isLoading: Boolean = false,
+    val searchOrigin: GeoCoordinates? = null,
+    val searchOriginLabel: String = "Location unavailable",
+    val originQuery: String = "",
+    val originPredictions: List<PlacePrediction> = emptyList(),
+    val isOriginLoading: Boolean = false,
+    val hasSearched: Boolean = false,
+    val errorMessage: String? = null,
 )

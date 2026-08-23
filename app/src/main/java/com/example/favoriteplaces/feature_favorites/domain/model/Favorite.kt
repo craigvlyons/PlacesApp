@@ -1,48 +1,24 @@
 package com.example.favoriteplaces.feature_favorites.domain.model
 
+import com.example.favoriteplaces.feature_favorites.domain.model.settings.DEFAULT_CARD_COLOR_ARGB
 
-import androidx.compose.ui.graphics.toArgb
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import com.example.favoriteplaces.ui.theme.BabyBlue
-import com.example.favoriteplaces.ui.theme.LightGreen
-import com.example.favoriteplaces.ui.theme.RedOrange
-import com.example.favoriteplaces.ui.theme.RedPink
-import com.example.favoriteplaces.ui.theme.Violet
-import com.google.gson.Gson
-
-@Entity
 data class Favorite(
-    @PrimaryKey
-    var id: Int? = null,
-    val placeId: String? = "",
+    val id: Int? = null,
+    val placeId: String? = null,
     val title: String,
     val address: String,
     val content: String?,
     val rating: Int?,
     val isFavorite: Boolean = false,
-    val color: Int = favoriteColors[3].toArgb(),
+    val color: Int = DEFAULT_COLOR_ARGB,
     val city: String,
     val latitude: Double,
-    val longitude: Double
+    val longitude: Double,
+    val placeType: String? = null,
+    val phoneNumber: String? = null,
+    val googlePrimaryType: String? = null,
 ) {
     companion object {
-        val favoriteColors = listOf(RedOrange, LightGreen, Violet, BabyBlue, RedPink)
+        const val DEFAULT_COLOR_ARGB: Int = DEFAULT_CARD_COLOR_ARGB
     }
-
-    fun toMapItems(): MapItems {
-        return MapItems(
-            city = city,
-            mapItems = listOf(
-                MapItem(latitude, longitude, title)
-            )
-        )
-    }
-
 }
-
-fun <T> String.fromJson(clazz: Class<T>): T {
-    return Gson().fromJson(this, clazz)
-}
-
-class InvalidNoteException(message: String) : Exception(message)

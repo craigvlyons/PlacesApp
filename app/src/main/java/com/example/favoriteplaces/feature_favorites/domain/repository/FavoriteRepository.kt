@@ -8,16 +8,13 @@ interface FavoriteRepository {
 
     suspend fun getFavoriteById(id: Int): Favorite?
 
-    suspend fun checkFavoriteExistsByPlaceId(placeId: String): Boolean
-
     suspend fun insertFavorite(favorite: Favorite)
 
     suspend fun updateIsFavorite(id: Int, isFavorite: Boolean)
 
     suspend fun deleteFavorite(favorite: Favorite)
 
-    fun getAllCities(): Flow<List<String>>?
-    fun getAllColors(): Flow<List<Int>>?
-
-    fun getFavoritesByCityAndColor(city: String, color: Int): Flow<List<Favorite>>?
+    fun getFavoritesByCityAndColor(city: String, color: Int): Flow<List<Favorite>>
 }
+
+class SavedPlaceAlreadyExistsException : IllegalStateException("Saved place already exists")
