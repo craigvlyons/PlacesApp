@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <style name="Theme.FavoritePlaces" parent="android:ThemeOverlay.Material.Dark" />
+    <style name="Theme.FavoritePlaces" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@color/app_canvas</item>
+        <item name="android:statusBarColor">@color/default_app_color</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
 </resources>

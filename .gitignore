@@ -1,0 +1,34 @@
+# Local Android SDK and API configuration
+local.properties
+secrets.properties
+release-signing.properties
+
+# Gradle caches and build output
+.gradle/
+.kotlin/
+build/
+**/build/
+
+# Android Studio and IntelliJ local state
+.idea/
+*.iml
+captures/
+__pycache__/
+*.py[cod]
+
+# Native build output
+.externalNativeBuild/
+.cxx/
+
+# Signing material must remain outside source control
+local-signing/
+*.jks
+*.keystore
+*.p12
+*.pfx
+
+# Local release/installed artifacts used only for upgrade verification
+local-artifacts/
+
+# OS metadata
+.DS_Store

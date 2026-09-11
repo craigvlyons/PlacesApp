@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.Flow
 class GetFavoritesByCityAndColorUseCase(
     private val repository: FavoriteRepository
 ) {
-    suspend operator fun invoke(city: String, color : Int) : Flow<List<Favorite>>? = repository.getFavoritesByCityAndColor(city, color)
-
-    suspend fun getColors() : Flow<List<Int>>? = repository.getAllColors()
+    operator fun invoke(city: String, color: Int): Flow<List<Favorite>> =
+        repository.getFavoritesByCityAndColor(city, color)
 }

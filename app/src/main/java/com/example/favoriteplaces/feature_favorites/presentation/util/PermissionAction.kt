@@ -1,9 +1,7 @@
 package com.example.favoriteplaces.feature_favorites.presentation.util
 
-sealed class PermissionAction {
-    object OnPermissionGranted : PermissionAction()
-    object OnPermissionDenied : PermissionAction()
-
+sealed interface PermissionAction {
+    data object OnPermissionGranted : PermissionAction
+    data object OnPermissionDenied : PermissionAction
 }
-
 

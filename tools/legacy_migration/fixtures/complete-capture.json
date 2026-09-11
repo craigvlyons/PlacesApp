@@ -1,0 +1,63 @@
+{
+  "captureFormat": "places-legacy-capture",
+  "version": 1,
+  "deviceLabel": "synthetic-test-device",
+  "capturedAt": "2026-08-21T12:00:00-06:00",
+  "reviewedBy": "synthetic-test-reviewer",
+  "records": [
+    {
+      "id": 1,
+      "placeId": "place-1",
+      "title": "Root Down",
+      "address": "1600 W 33rd Ave, Denver, CO",
+      "content": "Legacy note",
+      "rating": 5,
+      "isFavorite": true,
+      "color": -21615,
+      "city": "Denver",
+      "latitude": 39.7631,
+      "longitude": -105.0056,
+      "evidence": ["records/0001/edit.xml", "records/0001/edit.png"],
+      "provenance": {
+        "id": "migration-generated",
+        "placeId": "resolved-from-address",
+        "title": "legacy-ui",
+        "address": "legacy-ui",
+        "content": "legacy-ui",
+        "rating": "legacy-ui",
+        "isFavorite": "legacy-ui",
+        "color": "legacy-ui",
+        "city": "resolved-from-address",
+        "latitude": "resolved-from-address",
+        "longitude": "resolved-from-address"
+      }
+    },
+    {
+      "id": 2,
+      "placeId": null,
+      "title": "Café Élan ☕",
+      "address": "1 Unicode Way, Montréal, QC",
+      "content": null,
+      "rating": null,
+      "isFavorite": false,
+      "color": -8266006,
+      "city": "Montréal",
+      "latitude": 45.5019,
+      "longitude": -73.5674,
+      "evidence": ["records/0002/edit.xml", "records/0002/edit.png"],
+      "provenance": {
+        "id": "migration-generated",
+        "placeId": "resolved-from-address",
+        "title": "legacy-ui",
+        "address": "legacy-ui",
+        "content": "legacy-ui",
+        "rating": "legacy-ui",
+        "isFavorite": "legacy-ui",
+        "color": "legacy-ui",
+        "city": "resolved-from-address",
+        "latitude": "resolved-from-address",
+        "longitude": "resolved-from-address"
+      }
+    }
+  ]
+}

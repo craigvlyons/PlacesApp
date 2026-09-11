@@ -1,22 +1,42 @@
 
+import java.util.Properties
+
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id ("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
-    id ("kotlin-kapt")
-    id ("com.google.dagger.hilt.android")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.secrets.gradle)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
 }
+
+val releaseSigningPropertiesFile = rootProject.file("release-signing.properties")
+val releaseSigningProperties = Properties().apply {
+    if (releaseSigningPropertiesFile.isFile) {
+        releaseSigningPropertiesFile.inputStream().use(::load)
+    }
+}
+
+fun requireReleaseSigningProperty(name: String): String =
+    releaseSigningProperties.getProperty(name)?.takeIf(String::isNotBlank)
+        ?: throw GradleException(
+            "Missing '$name' in ${releaseSigningPropertiesFile.name}. " +
+                "Copy release-signing.properties.example and keep the completed file out of Git."
+        )
 
 android {
     namespace = "com.example.favoriteplaces"
-    compileSdk = 34
+    compileSdk {
+        version = release(37)
+    }
 
     defaultConfig {
-        applicationId = "com.example.favoriteplaces"
+        // The legacy app must remain installed during verified data migration. Its
+        // signing key was lost, so the replacement needs a distinct permanent ID.
+        applicationId = "com.personal.favoriteplaces"
         minSdk = 24
-        targetSdk = 33
-        versionCode = 2
-        versionName = "2.0"
+        targetSdk = 37
+        versionCode = 13
+        versionName = "3.2.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -24,116 +44,107 @@ android {
         }
     }
 
+    signingConfigs {
+        if (releaseSigningPropertiesFile.isFile) {
+            create("release") {
+                storeFile = rootProject.file(requireReleaseSigningProperty("storeFile"))
+                storePassword = requireReleaseSigningProperty("storePassword")
+                keyAlias = requireReleaseSigningProperty("keyAlias")
+                keyPassword = requireReleaseSigningProperty("keyPassword")
+            }
+        }
+    }
     buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+        }
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.findByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlin{
-        jvmToolchain (11)
-        
-    }
-
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-
     buildFeatures {
         compose = true
         buildConfig = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.3"
     }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-    dataBinding{
-        enable = true
+    sourceSets {
+        getByName("androidTest").assets.directories.add("$projectDir/schemas")
     }
 }
 
 dependencies {
+    implementation(libs.gson)
 
-    val retrofitVersion = "2.9.0"
-    val glideVersion = "4.13.2"
-    //Retrofit
-    implementation ("com.squareup.retrofit2:retrofit:$retrofitVersion")
-    implementation ("com.squareup.retrofit2:converter-gson:$retrofitVersion")
-    implementation ("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.6")
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.compose.ui)
+    implementation(libs.compose.ui.tooling.preview)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.compose.bom))
+    implementation(libs.compose.ui.graphics)
+    implementation(libs.compose.material3)
+    testImplementation(libs.junit4)
+    testImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.androidx.test.junit)
+    androidTestImplementation(libs.androidx.test.espresso.core)
+    androidTestImplementation(libs.androidx.room.testing)
+    androidTestImplementation(platform(libs.compose.bom))
+    androidTestImplementation(libs.compose.ui.test.junit4)
+    debugImplementation(libs.compose.ui.tooling)
+    debugImplementation(libs.compose.ui.test.manifest)
 
-    implementation ("com.google.code.gson:gson:2.9.0")
-
-    implementation("androidx.core:core-ktx:1.10.1")
-    implementation ("androidx.appcompat:appcompat:1.6.1")
-    implementation ("com.google.android.material:material:1.9.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0-alpha01")
-    implementation("androidx.compose.ui:ui")
-    implementation ("androidx.compose.material:material:1.5.0")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
-    implementation("androidx.activity:activity-compose:1.7.2")
-    implementation(platform("androidx.compose:compose-bom:2023.03.00"))
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.material3:material3")
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
-
-    // google maps, places
-    //implementation ("com.google.maps.android:maps-compose:2.13.0")
-    implementation ("com.google.android.gms:play-services-maps:18.1.0")
-    implementation ("com.google.maps.android:maps-ktx:3.4.0")
-    implementation ("com.google.android.libraries.places:places:3.2.0")
+    // Google Maps and Places
+    implementation(libs.maps.compose)
+    implementation(libs.places)
 
 
     // Compose dependencies
-    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0-alpha01")
-    implementation ("androidx.navigation:navigation-compose:2.7.0")
-    implementation ("androidx.compose.material:material-icons-extended:1.4.3")
-    implementation ("androidx.hilt:hilt-navigation-compose:1.1.0-alpha01")
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.compose.material.icons.extended)
+    implementation(libs.androidx.hilt.navigation.compose)
 
     // Coroutines
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(platform(libs.kotlinx.serialization.bom))
 
     //Dagger - Hilt
-    implementation ("com.google.dagger:hilt-android:2.44")
-    kapt ("com.google.dagger:hilt-android-compiler:2.44")
-    kapt ("androidx.hilt:hilt-compiler:1.0.0")
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
 
     // Room
-    implementation ("androidx.room:room-runtime:2.5.2")
-    kapt ("androidx.room:room-compiler:2.5.2")
-
-    //Glide
-    implementation ("com.github.bumptech.glide:glide:$glideVersion")
-    annotationProcessor ("com.github.bumptech.glide:compiler:$glideVersion")
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
 
     // Kotlin Extensions and Coroutines support for Room
-    implementation ("androidx.room:room-ktx:2.5.2")
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.datastore.preferences)
 }
 
-// Allow references to generated code
-kapt {
-    correctErrorTypes = true
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+    arg("room.incremental", "true")
 }
 
 secrets{
-    defaultPropertiesFileName = "local.properties"
+    defaultPropertiesFileName = "local.defaults.properties"
 }

@@ -2,21 +2,30 @@ package com.example.favoriteplaces.di
 
 import android.content.Context
 import android.location.Geocoder
-import com.example.favoriteplaces.BuildConfig
-import com.example.favoriteplaces.feature_favorites.data.data_source.api.GooglePlacesApi
-import com.example.favoriteplaces.feature_favorites.data.repository.PlacesRepositoryImpl
-import com.example.favoriteplaces.feature_favorites.domain.use_case.apiusecase.GetPlaceDetailsUseCase
-import com.example.favoriteplaces.feature_favorites.domain.use_case.apiusecase.GetPredictionsUseCase
+import com.example.favoriteplaces.feature_favorites.data.repository.GooglePlaceSearchRepository
+import com.example.favoriteplaces.feature_favorites.data.repository.UnavailablePlaceSearchRepository
+import com.example.favoriteplaces.feature_favorites.data.repository.GoogleNearbyPlacesRepository
+import com.example.favoriteplaces.feature_favorites.data.repository.UnavailableNearbyPlacesRepository
+import com.example.favoriteplaces.feature_favorites.data.location.AndroidCurrentLocationProvider
+import com.example.favoriteplaces.feature_favorites.domain.repository.CurrentLocationProvider
+import com.example.favoriteplaces.feature_favorites.domain.repository.PlaceSearchRepository
+import com.example.favoriteplaces.feature_favorites.domain.repository.NearbyPlacesRepository
+import com.example.favoriteplaces.feature_favorites.domain.repository.SavedPlaceRefreshRepository
+import com.example.favoriteplaces.feature_favorites.data.repository.GoogleSavedPlaceRefreshRepository
+import com.example.favoriteplaces.feature_favorites.data.repository.UnavailableSavedPlaceRefreshRepository
+import com.example.favoriteplaces.feature_favorites.data.repository.GoogleSavedPlaceActionMetadataRepository
+import com.example.favoriteplaces.feature_favorites.data.repository.UnavailableSavedPlaceActionMetadataRepository
+import com.example.favoriteplaces.feature_favorites.domain.repository.SavedPlaceActionMetadataRepository
+import com.example.favoriteplaces.feature_favorites.presentation.util.AddressResolver
+import com.example.favoriteplaces.feature_favorites.presentation.util.AndroidAddressResolver
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.libraries.places.api.Places
-import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 
@@ -25,51 +34,54 @@ import javax.inject.Singleton
 object PlacesApiModule {
     @Singleton
     @Provides
-    fun provideRetrofit(): Retrofit {
-        return Retrofit.Builder()
-            .addConverterFactory(GsonConverterFactory.create())
-            .baseUrl(GooglePlacesApi.BASE_URL)
-            .build()
+    fun providePlaceSearchRepository(
+        @ApplicationContext context: Context,
+    ): PlaceSearchRepository = if (Places.isInitialized()) {
+        GooglePlaceSearchRepository(Places.createClient(context))
+    } else {
+        UnavailablePlaceSearchRepository
     }
 
     @Singleton
     @Provides
-    fun providesGooglePlacesApi(retrofit: Retrofit): GooglePlacesApi {
-        return retrofit.create(GooglePlacesApi::class.java)
+    fun provideNearbyPlacesRepository(
+        @ApplicationContext context: Context,
+    ): NearbyPlacesRepository = if (Places.isInitialized()) {
+        GoogleNearbyPlacesRepository(Places.createClient(context))
+    } else {
+        UnavailableNearbyPlacesRepository
     }
 
     @Singleton
     @Provides
-    fun providesPlacesRepositoryImpl(placesApi: GooglePlacesApi): PlacesRepositoryImpl {
-        return PlacesRepositoryImpl(
-            placesApi,
-            apiKey = BuildConfig.MAPS_API_KEY
-        )
+    fun provideSavedPlaceRefreshRepository(
+        @ApplicationContext context: Context,
+    ): SavedPlaceRefreshRepository = if (Places.isInitialized()) {
+        GoogleSavedPlaceRefreshRepository(Places.createClient(context))
+    } else {
+        UnavailableSavedPlaceRefreshRepository
     }
 
-    @Provides
     @Singleton
-    fun providesPredictionUseCase(placesRepositoryImpl: PlacesRepositoryImpl) : GetPredictionsUseCase {
-        return GetPredictionsUseCase(placesRepositoryImpl)
+    @Provides
+    fun provideSavedPlaceActionMetadataRepository(
+        @ApplicationContext context: Context,
+    ): SavedPlaceActionMetadataRepository = if (Places.isInitialized()) {
+        GoogleSavedPlaceActionMetadataRepository(Places.createClient(context))
+    } else {
+        UnavailableSavedPlaceActionMetadataRepository
     }
 
-    @Provides
     @Singleton
-    fun providesPlacesDetailsUseCase(placesRepositoryImpl: PlacesRepositoryImpl) : GetPlaceDetailsUseCase {
-        return GetPlaceDetailsUseCase(placesRepositoryImpl)
-    }
-
     @Provides
-    @Singleton
-    fun providePlacesClient(@ApplicationContext context: Context): PlacesClient {
-        Places.initialize(context, BuildConfig.MAPS_API_KEY)
-        return Places.createClient(context)
-    }
+    fun provideCurrentLocationProvider(
+        implementation: AndroidCurrentLocationProvider,
+    ): CurrentLocationProvider = implementation
 
     @Provides
     @Singleton
     fun provideFusedLocationProviderClient(@ApplicationContext context: Context): FusedLocationProviderClient {
-        return FusedLocationProviderClient(context)
+        return LocationServices.getFusedLocationProviderClient(context)
     }
 
     @Provides
@@ -77,6 +89,11 @@ object PlacesApiModule {
     fun provideGeocoder (@ApplicationContext context: Context): Geocoder {
         return Geocoder(context)
     }
+
+    @Provides
+    @Singleton
+    fun provideAddressResolver(geocoder: Geocoder): AddressResolver =
+        AndroidAddressResolver(geocoder)
 
 
 }
