@@ -10,4 +10,4 @@ fun buildFavoriteDatabase(
     context.applicationContext,
     FavoriteDatabase::class.java,
     name,
-).addMigrations(*FavoriteDatabaseMigrations.ALL).build()
+).build()

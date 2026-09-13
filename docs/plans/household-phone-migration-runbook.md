@@ -234,13 +234,16 @@ Important limitation: the current v3 offline enrichment helper expects a reviewe
 Use the exact approved signed APK and record its hash before installation:
 
 ```sh
-shasum -a 256 app/build/outputs/apk/release/app-release.apk
+places_release_apk="app/build/outputs/apk/release/Places-1.0.0.apk"
+shasum -a 256 "$places_release_apk"
 ```
+
+Replace the example version in `places_release_apk` with the explicitly approved release version; release builds are named automatically and the embedded version/signature must still be verified.
 
 Install without uninstalling or clearing either package:
 
 ```sh
-"$ADB" -s PHONE_SERIAL install -r app/build/outputs/apk/release/app-release.apk
+"$ADB" -s PHONE_SERIAL install -r "$places_release_apk"
 ```
 
 Verify afterward:

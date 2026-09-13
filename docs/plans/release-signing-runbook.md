@@ -11,6 +11,7 @@ The replacement package is `com.personal.favoriteplaces`. Because household APKs
 - Keystores and the completed properties file are ignored by Git.
 - Debug builds continue to use the Mac's disposable debug certificate.
 - With the completed ignored properties present, `assembleRelease` produces the signed replacement. Without them it remains an unsigned technical build and must not be distributed.
+- Release APKs are named automatically from the manifest version as `Places-<version>.apk` through AGP's public Variant API; do not manually rename or distribute a stale generic output.
 
 ## One-time key creation
 
