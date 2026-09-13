@@ -295,6 +295,7 @@ private fun GroupedSavedPlaces(
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 city.colorVariations.forEach { group ->
                     FavoriteListView(
+                        city = city.city,
                         favoritesList = group,
                         onOpen = { favorite ->
                             favorite.id?.let { navController.navigate(Screen.PlaceDetailsScreen.route(it)) }
@@ -334,7 +335,9 @@ private fun SavedPlacesFilterSheet(
     var grouped by remember(state.isListView) { mutableStateOf(state.isListView) }
     ModalBottomSheet(onDismissRequest = onDismiss) {
         LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("saved_places_filter_list"),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -443,7 +446,12 @@ private fun SavedPlacesFilterSheet(
                 }
             }
             item {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .testTag("saved_places_filter_actions"),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
                     TextButton(onClick = onClear, modifier = Modifier.weight(1f)) { Text("Clear all") }
                     Button(
                         onClick = { onApply(draft, order, grouped) },

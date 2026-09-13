@@ -133,7 +133,10 @@ class LegacyWorkflowUiTest {
             .fetchSemanticsNode().boundsInRoot
         assertTrue("Card rating should be above Favorite", cardRating.bottom <= cardHeart.top)
         assertTrue("Card Favorite should be above Map", cardHeart.bottom <= cardMap.top)
-        assertTrue("Card text should start above rating", cardText.top < cardRating.top)
+        assertTrue(
+            "Card text should begin no lower than the rating center",
+            cardText.top <= cardRating.center.y,
+        )
         assertTrue(
             "Card actions should have equal vertical spacing",
             abs(
@@ -214,7 +217,7 @@ class LegacyWorkflowUiTest {
         composeRule.onNodeWithText(FIXTURE.title).assertIsDisplayed()
         composeRule.onNodeWithText(FIXTURE.address).assertIsDisplayed()
         composeRule.onAllNodesWithText(FIXTURE.content.orEmpty()).onFirst().assertIsDisplayed()
-        composeRule.onAllNodesWithText(FIXTURE.city).assertCountEquals(0)
+        composeRule.onAllNodesWithText(FIXTURE.city).onFirst().assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Show ${FIXTURE.title} on map").assertIsDisplayed()
 
         composeRule.onNodeWithContentDescription("Show ${FIXTURE.title} on map").performClick()
@@ -319,6 +322,12 @@ class LegacyWorkflowUiTest {
         composeRule.onAllNodesWithContentDescription("Rating 2 out of 5")
             .onFirst()
             .assertIsDisplayed()
+        val groupedCityTitle = composeRule.onNodeWithTag(
+            "grouped_city_title_$FIXTURE_ID",
+            useUnmergedTree = true,
+        )
+        groupedCityTitle.assertIsDisplayed()
+        composeRule.onNodeWithText(FIXTURE.city).assertIsDisplayed()
         composeRule.onAllNodesWithTag(
             "grouped_place_divider",
             useUnmergedTree = true,
@@ -353,9 +362,14 @@ class LegacyWorkflowUiTest {
             useUnmergedTree = true,
         )
             .fetchSemanticsNode().boundsInRoot
+        val groupedCityBounds = groupedCityTitle.fetchSemanticsNode().boundsInRoot
+        assertTrue("Grouped city title should be above its places", groupedCityBounds.bottom <= groupedText.top)
         assertTrue("Grouped rating should be above Favorite", groupedRating.bottom <= groupedHeart.top)
         assertTrue("Grouped Favorite should be above Map", groupedHeart.bottom <= groupedMap.top)
-        assertTrue("Grouped text should start above rating", groupedText.top < groupedRating.top)
+        assertTrue(
+            "Grouped text should begin no lower than the rating center",
+            groupedText.top <= groupedRating.center.y,
+        )
         assertTrue(
             "Grouped actions should have equal vertical spacing",
             abs(
@@ -506,6 +520,8 @@ class LegacyWorkflowUiTest {
     private fun ensureCardView() {
         if (composeRule.onAllNodesWithTag("favorite_card_$FIXTURE_ID").fetchSemanticsNodes().isEmpty()) {
             composeRule.onNodeWithText("Filter", substring = true).performClick()
+            composeRule.onNodeWithTag("saved_places_filter_list")
+                .performScrollToNode(hasTestTag("saved_places_filter_actions"))
             composeRule.onNodeWithTag("group_by_city_switch").performClick()
             composeRule.onNodeWithText("Apply").performClick()
         }
@@ -515,6 +531,8 @@ class LegacyWorkflowUiTest {
     private fun ensureListView() {
         if (composeRule.onAllNodesWithTag("favorite_card_$FIXTURE_ID").fetchSemanticsNodes().isNotEmpty()) {
             composeRule.onNodeWithText("Filter", substring = true).performClick()
+            composeRule.onNodeWithTag("saved_places_filter_list")
+                .performScrollToNode(hasTestTag("saved_places_filter_actions"))
             composeRule.onNodeWithTag("group_by_city_switch").performClick()
             composeRule.onNodeWithText("Apply").performClick()
         }

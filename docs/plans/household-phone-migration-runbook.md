@@ -6,6 +6,23 @@
 
 This is the authoritative repeatable procedure for moving saved places out of the non-debuggable legacy app and into the side-by-side replacement. It records what worked for Craig's 26-place migration and the safeguards required when repeating it for his wife's phone.
 
+## New-phone transfer failure: recovery order
+
+If a replacement phone receives a missing, empty, or unusable Places installation, do not uninstall either phone's app, clear storage, factory-reset either device, or repeatedly open an unexpectedly empty copy while recovery sources are still being identified.
+
+Use this order:
+
+1. Look for an explicit `places-app-backup` JSON created from **Settings → Data & backup → Export**. Validate its format, version, declared count, record count, and record digest before importing it. This is the preferred recovery source because it is independent of Android's opaque transfer timing.
+2. If the old phone still opens the replacement app, create a new export there and preserve the old phone until the new phone's post-import export matches it.
+3. If the old phone has only the legacy app, use the guarded record-level capture in this runbook; do not attempt to pull or replace its private SQLite database.
+4. If neither explicit source exists, inspect the old device's Google backup and any Samsung Smart Switch computer/external-storage backup before considering a reset. Android says Google backup can include app data but not every app restores all data, and setup transfer does not automatically copy apps that were not installed from Google Play. Auto Backup may restore data when the matching APK is installed if the correct ancestral backup was selected during setup, but this is less observable than the explicit Places export. References: [Android backup and restore](https://support.google.com/android/answer/2819582), [Android device-to-device copy limits](https://support.google.com/android/answer/13761358), [Auto Backup restore schedule](https://developer.android.com/identity/data/autobackup), and [Samsung backup/restore options](https://www.samsung.com/us/support/answer/ANS10002780/).
+
+The current replacement package explicitly includes its Room database and relevant preferences in Android cloud/device-transfer rules, but the signed APK is distributed outside Google Play. Keep making explicit versioned exports because they can be inspected and imported without resetting a phone.
+
+### 2026-09-13 recovery snapshot
+
+The Mac's synced Google Drive `places` directory contains two intact version-4 exports belonging to Craig: an older 26-record file and a newer 34-record file. Both have the required envelope, matching declared/actual counts, and matching canonical record digests. The 34-record file contains all 26 older titles plus eight additional titles. It is suitable as an owner-approved starter collection for the wife's replacement app, but it is not a recovery of her prior local-only records. No phone or database was changed during this inspection.
+
 ## Non-negotiable safety rules
 
 1. Never uninstall, clear, reset, or overwrite the legacy app during capture or verification.
@@ -217,13 +234,16 @@ Important limitation: the current v3 offline enrichment helper expects a reviewe
 Use the exact approved signed APK and record its hash before installation:
 
 ```sh
-shasum -a 256 app/build/outputs/apk/release/app-release.apk
+places_release_apk="app/build/outputs/apk/release/Places-1.0.0.apk"
+shasum -a 256 "$places_release_apk"
 ```
+
+Replace the example version in `places_release_apk` with the explicitly approved release version; release builds are named automatically and the embedded version/signature must still be verified.
 
 Install without uninstalling or clearing either package:
 
 ```sh
-"$ADB" -s PHONE_SERIAL install -r app/build/outputs/apk/release/app-release.apk
+"$ADB" -s PHONE_SERIAL install -r "$places_release_apk"
 ```
 
 Verify afterward:
@@ -335,4 +355,3 @@ After sign-off:
 - [`phase-0-evidence-report.md`](phase-0-evidence-report.md) — Craig's engineering and first-household evidence summary.
 - [`rolling-implementation-plan.md`](rolling-implementation-plan.md) — authoritative implementation history and remaining household rollout gate.
 - [`release-signing-runbook.md`](release-signing-runbook.md) — permanent replacement signing and update continuity.
-
