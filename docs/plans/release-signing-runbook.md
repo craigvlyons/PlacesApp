@@ -1,6 +1,6 @@
 # Places replacement release-signing runbook
 
-**Status:** Permanent local signer created and verified; independent recovery copy remains pending.
+**Status:** Permanent local signer created and verified; encrypted export/restore tooling is available, but an independently stored recovery bundle still requires the owner's chosen destination and password-manager entry.
 
 The replacement package is `com.personal.favoriteplaces`. Because household APKs are shared directly rather than through Google Play, the same self-managed release key must sign every future replacement update. Losing this key would repeat the legacy-app problem: Android would refuse future APK updates and another side-by-side migration would be required.
 
@@ -39,6 +39,24 @@ Before the first household release, make two independently readable recovery cop
 2. Off-device encrypted copy in a user-chosen password manager or encrypted cloud/archive location that will survive another Mac reset.
 
 The recovery set must contain both `places-release.p12` and its alias/password information from `release-signing.properties`. Merely backing up one without the other is insufficient. Verify the copied keystore with `keytool -list` before calling the recovery copy complete.
+
+Create a portable encrypted bundle without exposing either signing password on the command line:
+
+```sh
+tools/release/export_signing_bundle.sh \
+  "/path/to/private-storage/places-signing-backup.tar.gz.enc"
+```
+
+The script verifies the local signer against the pinned production certificate, refuses to overwrite an existing destination, packages only the keystore and signing properties, and encrypts the stream with AES-256-CBC plus PBKDF2 before it is written. Store the archive password separately in a password manager; losing either the archive or that password makes the recovery copy unusable. The Maps API key is intentionally excluded.
+
+On another computer, clone the repository, install a JDK and Android SDK, then restore into a checkout that does not already contain signing material:
+
+```sh
+tools/release/import_signing_bundle.sh \
+  "/path/to/private-storage/places-signing-backup.tar.gz.enc"
+```
+
+The restore script decrypts into a private temporary directory, rejects unexpected files and links, validates the properties and exact production certificate fingerprint, refuses to replace an existing key, and installs both local files with owner-only permissions. Create that computer's ignored `local.properties` separately using `local.properties.example`; its `sdk.dir` is machine-specific and `MAPS_API_KEY` remains a separately managed Google credential.
 
 ## Verification
 

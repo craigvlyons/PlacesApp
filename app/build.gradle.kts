@@ -35,8 +35,8 @@ android {
         applicationId = "com.personal.favoriteplaces"
         minSdk = 24
         targetSdk = 37
-        versionCode = 13
-        versionName = "3.2.8"
+        versionCode = 15
+        versionName = "3.2.10"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

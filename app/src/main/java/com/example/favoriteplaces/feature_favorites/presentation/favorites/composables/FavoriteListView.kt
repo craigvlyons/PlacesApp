@@ -37,6 +37,7 @@ import com.example.favoriteplaces.feature_favorites.presentation.sharedcomposabl
 
 @Composable
 fun FavoriteListView(
+    city: String,
     favoritesList: ColorGroupUiModel,
     modifier: Modifier = Modifier,
     onOpen: (Favorite) -> Unit,
@@ -63,6 +64,17 @@ fun FavoriteListView(
                     }
                     .padding(start = 20.dp, top = 10.dp, end = 16.dp, bottom = 2.dp)
             ) {
+                Text(
+                    text = city.ifBlank { "City not set" },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 4.dp)
+                        .testTag("grouped_city_title_${favoritesList.favorites.firstOrNull()?.id}"),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
                 favoritesList.favorites.forEach { favorite ->
                     SwipeToDeleteContainer(item = favorite, onDelete = onDelete) { item ->
                         Column(Modifier.fillMaxWidth()) {
